@@ -1,0 +1,388 @@
+
+---
+output: # rmarkdown::github_document
+  html_document:
+  pdf_document: default
+  word_document: default
+title: "Assignment 3.  Working with Data Frame. Base R Style"
+---
+
+***Note*:** *This assignment practices working with Data Frame using Base R.*
+
+***How to do it?***: 
+
+- Open the Rmarkdown file of this assignment ([link](assignment3.Rmd)) in Rstudio. 
+
+- Right under each question, insert  a code chunk (you can use the hotkey `Ctrl + Alt + I` to add a code chunk) and code the solution for the question. 
+
+- `Knit` the rmarkdown file (hotkey: `Ctrl + Alt + K`) to export an html.  
+
+-  Publish the html file to your Githiub Page. 
+
+***Submission***: Submit the link on Github of the assignment to Canvas under Assignment 3. 
+
+-------
+
+Problems
+-------
+
+1. Create the following data frame
+
+| Rank 	| Age 	| Name  	|
+|:------	|:-----	|:-------	|
+| 0    	| 28  	| Tom   	|
+| 1    	| 34  	| Jack  	|
+| 2    	| 29  	| Steve 	|
+| 3    	| 42  	| Ricky 	|
+
+```{r}
+df = data.frame(Rank = c('0','1','2','3'),
+                Age = c(28,34,29,42),
+                Name = c('Tom','Jack','Steve',
+                         'Ricky'))
+                         
+df
+```
+
+
+2. Use `read.csv` to import the Covid19 Vaccination data from WHO: [link](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv).
+
+```{r}
+df2 <- read.csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv')
+head(df2)
+```
+
+
+2. Show the names of the variables in the data
+
+```{r}
+names(df2)
+```
+
+
+3. How many columns and rows the data have? 
+
+```{r}
+str(df2)
+```
+
+
+4. How many missing values are there?  Show the missing values by columns.  What variable has the most number of missing values?
+
+```{r}
+sum(is.na(df2))
+
+colSums(is.na(df2))
+
+# There are no missing values; therefore, all
+# variables have no missing values.
+
+```
+
+
+5. What is the class of the `date` column. Change the `date` columns to `date` type using the `as.Date` function. Show the new class of the `date` column. 
+
+```{r}
+class(df2$date)
+
+df2$date = as.Date(df2$date)
+
+class(df2$date)
+
+# The class of the date column was converted from
+# character to date.
+```
+
+
+6. Capitalize the names of all the variables
+
+```{r}
+
+names(df2)[1] <- 'Date'
+names(df2)[2] <- 'State'
+names(df2)[3] <- 'Fips'
+names(df2)[4] <- 'Cases'
+names(df2)[5] <- 'Deaths'
+head(df2)
+
+
+```
+
+
+7. Find the average number of cases per day. Find the maximum cases a day.
+
+```{r}
+
+mean(df2$Cases, na.rm = TRUE)
+max(df2$Cases, na.rm = TRUE)
+
+```
+
+8. How many states are there in the data?  
+
+```{r}
+#The data includes all 50 states and 6 U.S. Territories.
+
+table(df2$State)
+summary(df2$State)
+
+```
+
+
+9. Create a new variable `weekdays` to store the weekday for each rows.
+
+```{r}
+
+df2$weekdays <- weekdays(df2$Date)
+head(df2)
+
+```
+
+
+10. Create the categorical variable `death2` variable taking the values as follows
+
+- `has_death` if there is a death that day
+-  `no_death` if there is no death that day
+
+Find the frequency and relative frequency of `no_death` and `has_death`. 
+```{r}
+df2$death2 <- ifelse(df2$Deaths==0,
+                     'no_death','has_death')
+
+head(df2)
+```
+
+```{r}
+
+no_death = sum(df2$death2 == 'no_death')
+
+has_death = sum(df2$death2 == 'has_death')
+
+table(df2$death2)
+
+prop.table(table(df2$death2))
+
+```
+```{r}
+#Since this was answered in the cell above. Relative frequency was
+#calculated using different method in this cell.
+
+print("Relative frequency of no_death")
+
+no_death/(no_death+has_death)
+
+print("Relative frequency of has_death")
+
+has_death/(no_death+has_death)
+
+```
+
+
+11. Find the first quartile (Q1), second quartile (Q2) and and third quartile (Q3) of the variable `death`. (Hint:  Use the `summary` function)
+
+```{r}
+summary(df2$Deaths)
+```
+12. Create the categorical variable `death3` variable taking the values as follows
+
+- `low_death` if the number of deaths smaller than the 25 percentile (Q1)
+
+- `mid_death` if the number of deaths from Q1 to Q3
+
+- `high_death` if the number of deaths greater than Q3
+
+```{r}
+library(dplyr)
+
+df2$death3 <- case_when(df2$Deaths<1171 ~ 'low_death',
+                             df2$Deaths<14912 ~ 'mid_death',
+                             TRUE~'high_death')
+table(df2$death3)
+
+```
+```{r}
+#Viewing the first 6 rows of the dataframe.
+head(df2)
+```
+
+
+13. Find the average cases in Rhode Island in 2021
+
+```{r}
+#Subsetting the dataframe based on cases in 2021.
+
+df3 <- df2[(df2$Date<='2021-12-31')&
+           (df2$State == 'Rhode Island'),]
+
+df3 <- df3[df3$Date>='2021-01-01',]
+head(df3)
+
+```
+```{r}
+#This line calculates the average number of cases in 2021. 
+#The average number of cases in Rhode Island in 2021 is 154,439.
+
+summary(df3$Cases)
+```
+
+
+14. Find the median cases by weekdays in Rhode Island in 2021 
+
+```{r}
+#Subsetting the dataframe by weekday and taking the median of cases for each subset.
+
+
+by(df3$Cases, df3$weekdays, median)
+
+
+```
+
+
+15. Compare the median cases in Rhode Island in June, July, August and September in 2021. 
+
+```{r}
+#Creating subset dataframes and comparing the median cases. The median number of cases has increased from June through September of 2021.
+
+dfJune <- df3[(df3$Date <= '2021-06-30')&
+                 (df3$Date>='2021-06-01'),]
+
+dfJuly <- df3[(df3$Date <= '2021-07-31')&
+                 (df3$Date>='2021-07-01'),]
+
+dfAugust <- df3[(df3$Date <= '2021-08-31')&
+                 (df3$Date>='2021-08-01'),]
+
+dfSeptember <- df3[(df3$Date <= '2021-09-30')&
+                 (df3$Date>='2021-09-01'),]
+
+print("June")
+median(dfJune$Cases)
+print("July")
+median(dfJuly$Cases)
+print("August")
+median(dfAugust$Cases)
+print("September")
+median(dfSeptember$Cases)
+```
+16. Find your own dataset, import it and implement the following functions on the data
+
+- head
+- str
+- names
+- mean, min, max
+- table
+- is.na
+- colSums
+- class
+- cor
+- by
+- ifelse
+- case_when
+
+```{r}
+#Importing a dataset from Kaggle: Source (https://www.kaggle.com/datasets/justinas/nba-players-data?resource=download)
+
+#The head function was used to display the first 6 rows of the data rather than the entire dataset.
+
+nbaDf <- read.csv('nba.csv')
+
+head(nbaDf)
+```
+
+```{r}
+str(nbaDf)
+```
+
+```{r}
+names(nbaDf)
+```
+
+```{r}
+averageHeight = mean(nbaDf$player_height)
+minHeight = min(nbaDf$player_height)
+maxHeight = max(nbaDf$player_height)
+
+```
+
+```{r}
+averageHeight
+```
+```{r}
+minHeight
+```
+```{r}
+maxHeight
+```
+```{r}
+#Converting height in centimeters to inches
+minHeight = minHeight/cm(1)
+maxHeight = maxHeight/cm(1)
+averageHeight = averageHeight/cm(1)
+```
+```{r}
+averageHeight
+```
+```{r}
+minHeight
+```
+```{r}
+maxHeight
+```
+```{r}
+table(nbaDf$team_abbreviation)
+```
+```{r}
+sum(is.na(nbaDf))
+```
+```{r}
+colSums(is.na(nbaDf))
+```
+```{r}
+class(nbaDf$player_weight)
+      
+```
+```{r}
+cor(nbaDf$player_height,nbaDf$player_weight)
+```
+
+```{r}
+#Viewing the average height of NBA players by country since 2000.
+nbaDf1 <- nbaDf[nbaDf$season>='2000-01',]
+by(nbaDf1$player_height, nbaDf1$country, mean)
+```
+
+```{r}
+
+head(ifelse(nbaDf$player_height > cm(84), "Over 7 Feet.",
+       "Under 7 Feet"))
+```
+```{r}
+#Using the case_when function to find out how many nba players fall into each category of rebounding.
+
+nbaDf2 <- case_when(nbaDf$reb<2.5 ~ 'poor_rebounder',
+                             nbaDf$reb<8 ~ 'average_rebounder',
+                             TRUE~'great_rebounder')
+table(nbaDf2)
+```
+
+17.  In the dataset in #16, practice the follows.  You can reuse the code of 16. 
+
+- Create a categorical variable from a continuous variable
+- From one categorical variable, create a new categorical variable with fewer categories
+
+```{r}
+#Creating a categorical variable from the continuous variable height.
+
+nbaDf$Seven_Feet <- ifelse(nbaDf$player_height > cm(84), "Over 7 Feet.",
+                    "Under 7 Feet.")
+head(nbaDf)
+```
+```{r}
+#Creating a new categorical variable from country.
+
+playerInfo <- ifelse(nbaDf$country == "USA",'Local Player','Foreign Player')
+nbaDf$Player_Info <- playerInfo
+head(nbaDf)
+```
+
+If you do not have a data, you can use [the titanic dataset](https://www.kaggle.com/competitions/titanic/overview), which can be downloaded at [this link](../data/titanic.csv)
