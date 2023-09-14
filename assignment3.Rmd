@@ -63,6 +63,8 @@ names(df2)
 3. How many columns and rows the data have? 
 
 ```{r}
+#There are 5 columns and 61,942 rows.
+summary(df2$state)
 str(df2)
 ```
 
@@ -123,9 +125,7 @@ max(df2$Cases, na.rm = TRUE)
 ```{r}
 #The data includes all 50 states and 6 U.S. Territories.
 
-table(df2$State)
-summary(df2$State)
-
+names(table(df2$State))
 ```
 
 
@@ -153,7 +153,7 @@ head(df2)
 ```
 
 ```{r}
-
+#Using R to calculate frequency and relative frequency (method 1)
 no_death = sum(df2$death2 == 'no_death')
 
 has_death = sum(df2$death2 == 'has_death')
@@ -163,6 +163,7 @@ table(df2$death2)
 prop.table(table(df2$death2))
 
 ```
+
 ```{r}
 #Since this was answered in the cell above. Relative frequency was
 #calculated using different method in this cell.
@@ -314,7 +315,7 @@ minHeight
 maxHeight
 ```
 ```{r}
-#Converting height in centimeters to inches
+#Converting height in centimeters to inche. (This was not used on the dataframe)
 minHeight = minHeight/cm(1)
 maxHeight = maxHeight/cm(1)
 averageHeight = averageHeight/cm(1)
@@ -359,10 +360,10 @@ head(ifelse(nbaDf$player_height > cm(84), "Over 7 Feet.",
 ```{r}
 #Using the case_when function to find out how many nba players fall into each category of rebounding.
 
-nbaDf2 <- case_when(nbaDf$reb<2.5 ~ 'poor_rebounder',
+rebounding <- case_when(nbaDf$reb<2.5 ~ 'poor_rebounder',
                              nbaDf$reb<8 ~ 'average_rebounder',
                              TRUE~'great_rebounder')
-table(nbaDf2)
+table(rebounding)
 ```
 
 17.  In the dataset in #16, practice the follows.  You can reuse the code of 16. 

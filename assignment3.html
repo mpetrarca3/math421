@@ -437,6 +437,10 @@ head(df2)</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>How many columns and rows the data have?</li>
 </ol>
+<pre class="r"><code>#There are 5 columns and 61,942 rows.
+summary(df2$state)</code></pre>
+<pre><code>##    Length     Class      Mode 
+##     61942 character character</code></pre>
 <pre class="r"><code>str(df2)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    61942 obs. of  5 variables:
 ##  $ date  : chr  &quot;2020-01-21&quot; &quot;2020-01-22&quot; &quot;2020-01-23&quot; &quot;2020-01-24&quot; ...
@@ -498,49 +502,35 @@ day.</li>
 </ol>
 <pre class="r"><code>#The data includes all 50 states and 6 U.S. Territories.
 
-table(df2$State)</code></pre>
-<pre><code>## 
-##                  Alabama                   Alaska           American Samoa 
-##                     1106                     1107                      548 
-##                  Arizona                 Arkansas               California 
-##                     1153                     1108                     1154 
-##                 Colorado              Connecticut                 Delaware 
-##                     1114                     1111                     1108 
-##     District of Columbia                  Florida                  Georgia 
-##                     1112                     1118                     1117 
-##                     Guam                   Hawaii                    Idaho 
-##                     1104                     1113                     1106 
-##                 Illinois                  Indiana                     Iowa 
-##                     1155                     1113                     1111 
-##                   Kansas                 Kentucky                Louisiana 
-##                     1112                     1113                     1110 
-##                    Maine                 Maryland            Massachusetts 
-##                     1107                     1114                     1147 
-##                 Michigan                Minnesota              Mississippi 
-##                     1109                     1113                     1108 
-##                 Missouri                  Montana                 Nebraska 
-##                     1112                     1106                     1131 
-##                   Nevada            New Hampshire               New Jersey 
-##                     1114                     1117                     1115 
-##               New Mexico                 New York           North Carolina 
-##                     1108                     1118                     1116 
-##             North Dakota Northern Mariana Islands                     Ohio 
-##                     1108                     1091                     1110 
-##                 Oklahoma                   Oregon             Pennsylvania 
-##                     1113                     1120                     1113 
-##              Puerto Rico             Rhode Island           South Carolina 
-##                     1106                     1118                     1113 
-##             South Dakota                Tennessee                    Texas 
-##                     1109                     1114                     1136 
-##                     Utah                  Vermont           Virgin Islands 
-##                     1123                     1112                     1105 
-##                 Virginia               Washington            West Virginia 
-##                     1112                     1158                     1102 
-##                Wisconsin                  Wyoming 
-##                     1143                     1108</code></pre>
-<pre class="r"><code>summary(df2$State)</code></pre>
-<pre><code>##    Length     Class      Mode 
-##     61942 character character</code></pre>
+names(table(df2$State))</code></pre>
+<pre><code>##  [1] &quot;Alabama&quot;                  &quot;Alaska&quot;                  
+##  [3] &quot;American Samoa&quot;           &quot;Arizona&quot;                 
+##  [5] &quot;Arkansas&quot;                 &quot;California&quot;              
+##  [7] &quot;Colorado&quot;                 &quot;Connecticut&quot;             
+##  [9] &quot;Delaware&quot;                 &quot;District of Columbia&quot;    
+## [11] &quot;Florida&quot;                  &quot;Georgia&quot;                 
+## [13] &quot;Guam&quot;                     &quot;Hawaii&quot;                  
+## [15] &quot;Idaho&quot;                    &quot;Illinois&quot;                
+## [17] &quot;Indiana&quot;                  &quot;Iowa&quot;                    
+## [19] &quot;Kansas&quot;                   &quot;Kentucky&quot;                
+## [21] &quot;Louisiana&quot;                &quot;Maine&quot;                   
+## [23] &quot;Maryland&quot;                 &quot;Massachusetts&quot;           
+## [25] &quot;Michigan&quot;                 &quot;Minnesota&quot;               
+## [27] &quot;Mississippi&quot;              &quot;Missouri&quot;                
+## [29] &quot;Montana&quot;                  &quot;Nebraska&quot;                
+## [31] &quot;Nevada&quot;                   &quot;New Hampshire&quot;           
+## [33] &quot;New Jersey&quot;               &quot;New Mexico&quot;              
+## [35] &quot;New York&quot;                 &quot;North Carolina&quot;          
+## [37] &quot;North Dakota&quot;             &quot;Northern Mariana Islands&quot;
+## [39] &quot;Ohio&quot;                     &quot;Oklahoma&quot;                
+## [41] &quot;Oregon&quot;                   &quot;Pennsylvania&quot;            
+## [43] &quot;Puerto Rico&quot;              &quot;Rhode Island&quot;            
+## [45] &quot;South Carolina&quot;           &quot;South Dakota&quot;            
+## [47] &quot;Tennessee&quot;                &quot;Texas&quot;                   
+## [49] &quot;Utah&quot;                     &quot;Vermont&quot;                 
+## [51] &quot;Virgin Islands&quot;           &quot;Virginia&quot;                
+## [53] &quot;Washington&quot;               &quot;West Virginia&quot;           
+## [55] &quot;Wisconsin&quot;                &quot;Wyoming&quot;</code></pre>
 <ol start="9" style="list-style-type: decimal">
 <li>Create a new variable <code>weekdays</code> to store the weekday for
 each rows.</li>
@@ -575,7 +565,8 @@ head(df2)</code></pre>
 ## 4 2020-01-24   Illinois   17     1      0    Friday no_death
 ## 5 2020-01-24 Washington   53     1      0    Friday no_death
 ## 6 2020-01-25 California    6     1      0  Saturday no_death</code></pre>
-<pre class="r"><code>no_death = sum(df2$death2 == &#39;no_death&#39;)
+<pre class="r"><code>#Using R to calculate frequency and relative frequency (method 1)
+no_death = sum(df2$death2 == &#39;no_death&#39;)
 
 has_death = sum(df2$death2 == &#39;has_death&#39;)
 
@@ -815,7 +806,7 @@ maxHeight = max(nbaDf$player_height)</code></pre>
 <pre><code>## [1] 160.02</code></pre>
 <pre class="r"><code>maxHeight</code></pre>
 <pre><code>## [1] 231.14</code></pre>
-<pre class="r"><code>#Converting height in centimeters to inches
+<pre class="r"><code>#Converting height in centimeters to inche. (This was not used on the dataframe)
 minHeight = minHeight/cm(1)
 maxHeight = maxHeight/cm(1)
 averageHeight = averageHeight/cm(1)</code></pre>
@@ -1104,11 +1095,11 @@ by(nbaDf1$player_height, nbaDf1$country, mean)</code></pre>
 ## [6] &quot;Under 7 Feet&quot;</code></pre>
 <pre class="r"><code>#Using the case_when function to find out how many nba players fall into each category of rebounding.
 
-nbaDf2 &lt;- case_when(nbaDf$reb&lt;2.5 ~ &#39;poor_rebounder&#39;,
+rebounding &lt;- case_when(nbaDf$reb&lt;2.5 ~ &#39;poor_rebounder&#39;,
                              nbaDf$reb&lt;8 ~ &#39;average_rebounder&#39;,
                              TRUE~&#39;great_rebounder&#39;)
-table(nbaDf2)</code></pre>
-<pre><code>## nbaDf2
+table(rebounding)</code></pre>
+<pre><code>## rebounding
 ## average_rebounder   great_rebounder    poor_rebounder 
 ##              6567               827              4911</code></pre>
 <ol start="17" style="list-style-type: decimal">
