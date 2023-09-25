@@ -366,8 +366,7 @@ universityDf %>%
   summarise(mean_ovr_score = mean(`OverAll Score`,na.rm=TRUE))
 ```
 ```{r}
-#Using the filter + group_by + summarise + arrange combo to find the countries with the highest mean over all score
-# among the world's best universities.
+#Using the filter + group_by + summarise + arrange combo to find the countries with the highest mean over all scorem among the world's best universities.
 
 universityDf %>% 
   filter(.[[4]] >= 5000 & .[[4]] <= 15000) %>% 

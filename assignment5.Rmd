@@ -25,10 +25,6 @@ title: "Assignment 5: Handle Missing Values"
 knitr::opts_chunk$set(message = FALSE)
 ```
 
-```{r}
-install.packages('tidyr')
-```
-
 -------
 
 **The data:** 
@@ -41,14 +37,18 @@ This assignment works with the Adult Census Data that can be downloaded at [this
 
 1. Use `read_csv` to import the data.  Show the number of NAs for each columns.  
 ```{r}
+#Importing the tidyverse library and dataset with read_csv.
+
 library(tidyverse)
 df <- read_csv('https://bryantstats.github.io/math421/data/adult_census_missing.csv')
 head(df)
 ```
 ```{r}
+#Checking for missing values by column.
 colSums(is.na(df))
 ```
 ```{r}
+#counting the number of NAs.
 sum(is.na(df))
 ```
 
@@ -56,43 +56,185 @@ sum(is.na(df))
 2. Using function `aggr` the VIM package to plot the number of NAs for each column. 
 
 ```{r}
-install.packages('VIM')
-```
+#Importing VIM and plotting missing values.
 
-```{r}
 library('VIM')
 aggr(df)
 ```
 
 3. Find other forms of missing values. Hint: You can use the `table` function to check if there are suspicious categories (Unknown, for example) in a variable. What all other forms of missing values shown in the data. 
+```{r}
+#Listing the variable names.
+names(df)
+```
+
 
 ```{r}
+#There are no suspicious categories within the variable 'age'.
 table(df$age)
 ```
 ```{r}
 #There are suspicious categories in the variable 'workclass'. There categories include
-#'?', 'Not known', 'Unknown',
+#'?', 'Not known', and 'Unknown'.
 table(df$workclass)
 ```
+```{r}
+#There are no suspicious categories within the variable 'fnlwgt'.
 
+head(table(df$fnlwgt))
+max(df$fnlwgt)
+min(df$fnlwgt)
+```
+```{r}
+#There are suspicious categories in the variable education. These categories are
+#'Not Known' and 'Unknown'
+table(df$education)
+```
+```{r}
+#There are no suspicious categories within the variable 'education.num'.
+table(df$education.num)
+```
+```{r}
+#There is one suspicious category within the variable 'marital.status'. This category
+#is titled 'Unknown'.
+table(df$marital.status)
+```
+```{r}
+#There are 3 suspicious categories within the variable 'occupation.'
+#These categories include '?','Not Known', and 'Unknown'
+table(df$occupation)
+```
+```{r}
+#There are two suspicious category within the variable 'relationship'.
+#The category is titled 'Unknown' and 'Not Known'
+table(df$relationship)
+```
+```{r}
+#There are no suspicious categories within the variable race.
+table(df$race)
+```
+
+```{r}
+#There is one suspicious category within the variable 'sex'.
+#The category is titled 'Unknown'.
+
+table(df$sex)
+```
+```{r}
+#There are no suspicious categories within the variable 'capital.gain'.
+table(df$capital.gain)
+```
+```{r}
+#There are no suspicious categories within the variable 'capital.loss'.
+table(df$capital.loss)
+```
+```{r}
+#There are no suspicious categories within the variable 'hours.per.week'.
+table(df$hours.per.week)
+```
+```{r}
+#There are 3 suspicious categories within the variable 'native.country.'
+#These categories include '?','Not Known', and 'Unknown'.
+table(df$native.country)
+```
+```{r}
+#There are no suspicious categories within the variable 'income'.
+table(df$income)
+```
 
 4. Replace all the forms of missing values found to NA
 
 ```{r}
-df1 <- df %>% 
-  replace('?','Unknown', NA)
+#Replacing all forms of missing values to NA within the dataframe. Since the same suspicious
+#categories have appeared in multiple variables, it is most efficient to us mutate_all.
+
+df1 <- df %>% mutate_all(~replace(., . == 'Not Known', NA)) %>% 
+  mutate_all(~replace(., . == '?', NA)) %>% 
+  mutate_all(~replace(., . == 'Unknown', NA))
+
+df1
 ```
 
 
 5. Replot the number of NAs for each column. 
 
+```{r}
+#As expected, the number of Nas by column has increased sharply after converting categories
+#to NA.
+colSums(is.na(df1))
+```
+```{r}
+#Plotting the number of missing values by column.
+aggr(df1)
+```
+
+
 6. Approach 1 to handle NAs: remove all rows that have any NAs. Save the dataset after removing as a different data. The original data is unchanged (still have NAs).  How many rows left after removing?
 
+```{r}
+#There are 29,865 rows left after removing the missing values by row.
+drop_na(df1)
+```
+
+
 7. Approach 2 to handle NAs:  Fill all the NAs with the previous or next value. (Hint: Using `fill` function).  Save the dataset after filling as a different data. The original data is unchanged (still have NAs). 
+```{r}
+#Checking for missing values by column.
+
+colSums(is.na(df1))
+
+```
+
+
+```{r}
+#Replacing NAs with the next value in the columns with missing values. The changes are saved to a new dataframe.
+df2 <- df1 %>% fill(age, workclass, education, 
+                    marital.status, occupation,
+                    relationship, sex, capital.gain, native.country,
+                    .direction = c("updown"))
+colSums(is.na(df2))
+```
+```{r}
+#Checking the dataframe.
+head(df2)
+```
 
 8. Approach 3 to handle NAs: For numeric variable, replace the NAs by the median.  For categorical variables, replace the NAs to the majority. 
 
+```{r}
+#In the dataframe, there are 9 variables with missing values. Of these variables, 2 are numeric. Therefore the columns that will be operated on are 'age' and 'capital.gain'.
+df1 %>% select_if(is.numeric)
+```
+```{r}
+#creating variables for the median of the two columns, and replacing the missing values with the median of each corresponding column.
+median_age = median(df1$age, na.rm = TRUE)
+median_capital.gain = median(df1$capital.gain, na.rm = TRUE)
+df1$age <- replace_na(df1$age, median_age)
+df1$capital.gain <- replace_na(df1$capital.gain, median_capital.gain)
+colSums(is.na(df1))
 
+```
+```{r}
+#Finding the majority category for each of the 7 categorical variables with missing values.
+df1 %>% select_if(is.character)
+```
+```{r}
+#Assigning variables to the most frequent class that appears within each categorical variable. The changes are then saved to the dataframe.
 
+majority_workclass = names(which.max(table(df1$workclass)))
+majority_education = names(which.max(table(df1$education)))
+majority_marital.status = names(which.max(table(df1$marital.status)))
+majority_occupation = names(which.max(table(df1$occupation)))
+majority_relationship = names(which.max(table(df1$relationship)))
+majority_sex = names(which.max(table(df1$sex)))
+majority_native.country = names(which.max(table(df1$native.country)))
 
-
+df1$workclass <- replace_na(df1$workclass, majority_workclass)
+df1$education <- replace_na(df1$education, majority_education)
+df1$marital.status <- replace_na(df1$marital.status, majority_marital.status)
+df1$occupation <- replace_na(df1$occupation, majority_occupation)
+df1$relationship <- replace_na(df1$relationship, majority_relationship)
+df1$sex <- replace_na(df1$sex, majority_sex)
+df1$native.country <- replace_na(df1$native.country, majority_native.country)
+colSums(is.na(df1))
+```
