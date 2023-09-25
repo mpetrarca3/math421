@@ -32,12 +32,15 @@ This assignment works with the [IMDB Top 1000 data](../data/imdb_top_1000.csv). 
 1. List all the names of the columns of the data
 
 ```{r}
+#Importing the library tidyverse and data.
+
 library(tidyverse)
 df <- read_csv('imdb_top_1000.csv')
 names(df)
 ```
 2. Which movies have the highest money earned (Gross)?
 ```{r}
+#Using group_by, summarise, and arrange to list the movies by gross from highest to lowest.
 df %>%
   group_by(Series_Title) %>% 
   summarise(Gross) %>% 
@@ -47,6 +50,7 @@ df %>%
 ```
 3. What is the lowest rating (IMDB_Rating)?  List five movies have this lowest rating.
 ```{r}
+#Using group_by, summarise, and arrange, to find the movie series that has the lowest rating. The head function is used to print the 6 lowest rated movies on IMDB from the dataset. The five movies with the lowest rating are, '21 Grams', '25th Hour', '28 Days Later...', '300', and '50/50'
 df %>%
   group_by(Series_Title) %>% 
   summarise(IMDB_Rating) %>% 
@@ -55,12 +59,14 @@ df %>%
 ```
 4. Which year have the most number of movies released in the list?  What is the total of money earned on that year? Ans: 2014 ; total revenue = $2,755,629,221	
 ```{r}
+#Using group_by, count, and arrange to find the year with the most movies released.
 df %>% 
   group_by(Released_Year) %>% 
   count(Released_Year) %>% 
   arrange(-n)
 ```
 ```{r}
+#Finding the total revenue in 2014 from movies.
 df %>%
   filter(Released_Year == '2014') %>% 
   summarise(total_revenue = sum(Gross,na.rm=TRUE))
@@ -68,16 +74,20 @@ df %>%
 
 5. What is the total money earned per movies on average? Ans: $68,034,751
 ```{r}
+#Using summarise to find the average money earned per movie.
+
 df %>% 
   summarise(avg_revenue = mean(Gross,na.rm=TRUE))
 ```
 6. Calculate the average number of votes by year. Calculate the average number of votes of movies that have IMDB rating greater than 9. Ans: 1,981,739	
 ```{r}
+#Using the group_by function to list the average number of votes by year.
 df %>% 
   group_by(Released_Year) %>% 
   summarise(avg_votes = mean(No_of_Votes,na.rm=TRUE))
 ```
 ```{r}
+#Filtering by movie series with IMDB ratings above 9.0 and then using summarise to find the average number of votes.
 df %>%
   filter(IMDB_Rating>9) %>% 
   summarise(avg_votes = mean(No_of_Votes,na.rm=TRUE))
@@ -85,6 +95,7 @@ df %>%
 ```
 7. Calculate the average Meta score in 2020 of movies that have number of votes in the third quartile.
 ```{r}
+#Finding the third quartile for votes in the year 2020 with summary. 
 df2020 <- df %>% filter(Released_Year == '2020')
 summary(df2020$No_of_Votes)
 ```
@@ -98,11 +109,13 @@ df2020 %>%
 
 ```
 ```{r}
+#Viewing the dataframe.
 df2020
 ```
 
 8. (Optional - Challenging). The current `Runtime` variable is not a numeric. Use the `str_remove` function to remove ` min` from the variables then use `as.numeric` to convert the variable to numeric. Calculate the average running time in the 2010s. Calculate the correlation between running time and rating (adding `use="complete.obs"` in the `cor` function to ignore the missing values).  
 ```{r}
+#Removing the string 'min' from the variable 'Runtime', and then using mutate to change the class from character to numeric. These changes are then saved to the dataframe.
 df$Runtime <- df$Runtime %>% 
   str_remove('min')
 
@@ -111,11 +124,13 @@ df <- df %>%
 head(df)
 ```
 ```{r}
+#Using filter and summarise to find the average runtime for the 2010s.
 df %>% 
   filter(Released_Year >=2010 & Released_Year <=2019) %>% 
   summarise(avg_run_time_2010s = mean(Runtime, na.rm = TRUE))
 ```
 ```{r}
+#Using the correlation function to find the correlation between the two numeric variables 'Runtime' and 'IMDB_Rating'.
 cor(df$Runtime, df$IMDB_Rating, use = "complete.obs")
 ```
 
@@ -152,6 +167,57 @@ names(df)
 df %>% filter(Genre == "Action, Crime, Drama")
 ```
 ```{r}
-d
+#Creating a variable that scales IMDB rating to Meta Score. This variable represents the average of the two.
+df1 <- df %>% mutate(Adjusted_Avg_Score = (10*IMDB_Rating + Meta_score)/2)
+df1
+```
+```{r}
+#Using summarise to find the min, mean, and max adjusted average score.
+
+df1 %>% summarise(min_adjusted_score = min(Adjusted_Avg_Score, na.rm = TRUE),
+                  mean_adjusted_score = mean(Adjusted_Avg_Score, na.rm = TRUE),
+                  max_adjusted_score = max(Adjusted_Avg_Score, na.rm = TRUE))
 ```
 
+```{r}
+#Using arrange to find the movie series with the highest adjusted average score.
+
+df1 %>% arrange(-Adjusted_Avg_Score)
+```
+```{r}
+#Using count to find the directors with the most movies. 
+
+df1 %>% count(Director, sort = TRUE)
+```
+```{r}
+#Using count + arrange to find the stars with the most lead roles in movies.
+df1 %>% count(Star1) %>% 
+  arrange(-n)
+```
+```{r}
+#Using filter + count + arrange to find the categories of movies produced by Alfred Hitchcock.
+
+df1 %>% filter(Director == "Alfred Hitchcock") %>% 
+  count(Genre) %>% 
+  arrange(-n)
+```
+```{r}
+#Using group_by + summarise to find the mean average adjusted score by genre.
+
+df1 %>% group_by(Genre) %>% 
+  summarise(mean_adj_score = mean(Adjusted_Avg_Score, na.rm = TRUE))
+```
+```{r}
+#Using filter + group_by + summarise to find the the total sales by genre since 2000.
+df1 %>% filter(Released_Year > 1999) %>% 
+  group_by(Genre) %>% 
+  summarise(total_Sales = sum(Gross, na.rm = TRUE))
+```
+```{r}
+#Using filter + group_by + summarise + arrange to find the directors that produced the most votes from their movies in the 20th century.
+
+df1 %>% filter(Released_Year < 2000) %>% 
+  group_by(Director) %>% 
+  summarise(total_votes = sum(No_of_Votes, na.rm = TRUE)) %>% 
+  arrange(-total_votes)
+```
