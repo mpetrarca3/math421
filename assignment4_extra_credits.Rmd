@@ -151,4 +151,7 @@ names(df)
 #Filtering movies by the big category "Action, Crime, Drama"
 df %>% filter(Genre == "Action, Crime, Drama")
 ```
+```{r}
+d
+```
 
