@@ -48,13 +48,17 @@ df
 
 df %>% ggplot()+ 
     geom_point(mapping=aes(x=age, y= finalWorth))+
-  facet_wrap(~gender)
+  facet_wrap(~gender)+
+  labs(title = "Billionaires by Gender",
+       caption = "The net worth of billionaires are compared by age across gender.",
+      tag = "Figure 1",x = "Age",y = "Final Worth")
 ```
 
 2. Make a plot using `facet_wrap` by two categorical variables (`facet_wrap(~variable1+variable2)`)
 
 ```{r}
 #Converting the class of selfMade from logical to character.
+
 df$selfMade <- df$selfMade %>% ifelse('True','False')
 df %>% head %>% select(selfMade)
 
@@ -62,10 +66,15 @@ df %>% head %>% select(selfMade)
 
 
 ```{r}
-#Using ggplot's facet_wrap function, the majority of male billionaires appear to be self made while the majority of female billionaires are not self made. The world's richest man and the world's richest woman are not self made. For some more detail on the variable `selfMade`, it is defined as someone who achieved their wealth without a large inheritance of wealth or status.  
+#Using ggplot's facet_wrap function, the majority of male billionaires appear to be self made while the majority of female billionaires are not self made. The world's richest man and the world's richest woman are not self made. For some more detail on the variable `selfMade`, it is defined as someone who achieved their wealth without a large inheritance of wealth or status.
+
 df %>% ggplot()+ 
   geom_point(mapping=aes(x=age, y=finalWorth ))+
-  facet_wrap(~gender+selfMade)
+  facet_wrap(~gender+selfMade)+
+  labs(title = "Self Made Billionaires by Gender",
+       caption = "The final net worth is compared across gender and between
+       whether they where self made and age.",
+      tag = "Figure 2",x = "Age",y = "Final Worth")
 ```
 
 3. Make a plot using `position ='dodge'`.
@@ -75,7 +84,11 @@ df %>% ggplot()+
 
 df %>% filter(country == 'United States') %>% ggplot()+ 
   geom_bar(mapping=aes(x=gender, fill=industries), 
-           position = 'dodge')
+           position = 'dodge')+
+  labs(title = "Billionaires by Industry",
+       caption = "The number of billionaires are compared 
+       between industries and gender.",
+      tag = "Figure 3",x = "Gender",y = "Number of Billionaires")
 
 ```
 
@@ -83,11 +96,15 @@ df %>% filter(country == 'United States') %>% ggplot()+
 4. Make a plot using `position ='fill'`. 
 
 ```{r}
-#The barplot for self made billionaires by gender gives a much better illustration than the second graph of the proportion of self made billionaires between males and females. 
+#The barplot for self made billionaires by gender gives a much better illustration than the second graph of the proportion of self made billionaires between males and females.
 
 df %>% ggplot()+ 
   geom_bar(mapping=aes(x=gender, fill=selfMade), 
-           position = 'fill')
+           position = 'fill')+
+  labs(title = "Self Made Billionaires by Gender",
+       caption = "The proportion of self made billionaires
+       are compared across gender.",
+      tag = "Figure 4",x = "Gender",y = "Proportion")
 
 ```
 
@@ -98,7 +115,11 @@ df %>% ggplot()+
 #Interestingly, there is a very high number of billionaires born in the month of January in comparison to the other months. This behavior is strange since the number of billionaires born in January doubles even the second highest month. 
 
 df %>% ggplot()+ 
-  geom_bar(mapping=aes(x=birthMonth))
+  geom_bar(mapping=aes(x=birthMonth))+
+  labs(title = "Billionaires by Birth Month",
+       caption = "A bar plot is used to represent the number
+       of billionaires by birth month.",
+      tag = "Figure 5",x = "Birth Month",y = "Number of Billionaires")
 
 ```
 
@@ -106,11 +127,19 @@ df %>% ggplot()+
 6. Change the theme of one of your plots. 
 
 ```{r}
-#There aren't many themes to chose from, but the linedraw theme makes the graph easier to read.
+#Library ggthemes was imported to access more themes. `theme_economist()` was used at the end to change the theme. The arguments 'fill' and color were used to change the color of the bars and the outline in the graph.
+
 library(ggthemes)
 
 df %>% ggplot()+ 
-  geom_bar(mapping=aes(x=birthMonth))+
+  geom_bar(mapping=aes(x=birthMonth), fill = 'yellow',
+           color = 'black')+
+  labs(title = "Billionaires by Birth Month",
+       caption = "A bar plot with extra detail 
+       is used to represent the
+       number of billionaires by birth month.",
+      tag = "Figure 6",x = "Birth Month",y = "Number of Billionaires",
+    )+
   theme_economist()
 ```
 
@@ -118,27 +147,33 @@ df %>% ggplot()+
 7. Make a plot using combo filter + ggplot
 
 ```{r}
+#Using the filter + ggplot combo the plot the final net worth of billionaires by age in the technology, finance & investments, and manufacturing industries. There is yet to be a person from one of these industries to reach a net worth of $100 billion USD.
+
 df %>% filter(industries == 'Technology'|
                 industries == 'Finance & Investments '|
                 industries == 'Manufacturing') %>% 
   ggplot()+
   geom_point((aes(x=age, y=finalWorth)), color = 'darkgreen')+
   labs(title = "Billionaires in 3 Industries",
-       caption = "Billionaires are compared from the Technology, 
-       Finance & Investments, and Manufacturing are compared",
-      tag = "Figure 1",x = "Age",y = "Final Worth",
-      color = "Gears"
-    )+theme_igray()
+       caption = "Billionaires from the Technology, 
+       Finance & Investments, and Manufacturing sectors are compared",
+      tag = "Figure 7",x = "Age",y = "Final Worth")+
+  theme_igray()
 ```
 
 
 8. Make a plot using combo group_by + summarise + geom_col
 
 ```{r}
+#Using the group_by + summarise + geom_col combo to plot the average net worth by industry among billionaires based on whether their wealth was selfmade. For self made billionaires, the average net worth was highest for those in the automotive industry. On the other hand, the average net worth was highest for billionaires who were not self made and are from the finance & investments industry.
+
 df %>% group_by(industries, selfMade) %>% 
   summarise(mean_worth = mean(finalWorth, na.rm = TRUE)) %>% 
   ggplot()+
-  geom_col(aes(x=selfMade, y=mean_worth, fill=industries), position = 'dodge')
+  geom_col(aes(x=selfMade, y=mean_worth, fill=industries), position = 'dodge')+
+  labs(title = "Average Net Worth by Industry",
+       caption = "The average networth of a billionaire is compared by industry",
+      tag = "Figure 8",x = "selfMade",y = "Average Final Worth")
   
 ```
 
@@ -147,6 +182,40 @@ df %>% group_by(industries, selfMade) %>%
 
 ```{r, eval=FALSE}
 [Link to the plot](abc.png)
+```
+
+```{r}
+#Ranking the countries by the highest number of billionaires.
+
+df$country %>% table %>%
+  sort(decreasing = TRUE) %>% 
+  names
+```
+
+```{r}
+#Making a plot to save.
+
+plot <- df %>% filter(country == "United States"|
+                country == "China"| country == "India"|
+                country == "Germany"|
+                country == "United Kingdom"|
+                country =="Russia"|country == "Switzerland"|
+                country == "Hong Kong"| country == "Italy"|
+                country == "Singapore") %>% 
+  group_by(country,gender) %>%
+  summarise(mean_finalWorth = mean(finalWorth, na.rm = TRUE)) %>% 
+  ggplot()+
+  geom_col(aes(x = country, y = mean_finalWorth, fill = gender), position = 'dodge')+
+  labs(title = "Billionaires in 10 Countries",
+       caption = "The average net worth of a billionaire is compared by gender in ten countries.",
+      tag = "Figure 9",x = "Country",y = " Average Final Worth")+
+    theme_fivethirtyeight()
+plot
+```
+```{r}
+#Saving the plot.
+
+ggsave(filename = 'billionaires.png', plot = plot)
 ```
 
 10. In this question, we will use  the Covid19 vaccination data for the US. The data and data dictionary can be found at the below link:
@@ -178,6 +247,37 @@ Do the follows.
   - Use `geom_point` to compare the vaccines used by date in Argentina in 2022. 
   
   - Change `geom_point` to `geom_line` in the above codes to have the corresponding line plots. 
+  
+```{r}
+#Filtering by location and year then plotting the total vaccinations by date. The two following graphs compare 6 different types of vaccines used in Argentina in 2022. The most popular vaccine was 'Sinopharm/Beijing while Moderna and Pfizer/BioNTech increased the most in total vaccinations over that year.
+
+df %>% 
+  filter(location=='Argentina', year(date) == '2022') %>% 
+  ggplot()+
+  geom_point(mapping = aes(x = date, 
+                                    y = total_vaccinations, 
+                                    color = vaccine))+
+  labs(title = "Types of Vaccines Used in Argentina",
+       caption = "The number of vaccinations in Argentina in 2022 
+       were compared across 6 vaccines.",
+      tag = "Figure 10",x = "Date",y = "Total Vaccinations")+
+    theme_fivethirtyeight()
+```
+```{r}
+#Filtering by location and year then plotting the total vaccinations by date. This graph is similar to the previous one, but there's a line connecting the observations.
+
+df %>% 
+  filter(location=='Argentina', year(date) == '2022') %>% 
+  ggplot()+
+  geom_line(mapping = aes(x = date, 
+                                    y = total_vaccinations, 
+                                    color = vaccine))+
+  labs(title = "Types of Vaccines Used in Argentina",
+       caption = "The number of vaccinations in Argentina in 2022 
+       were compared across 6 vaccines.",
+      tag = "Figure 11",x = "Date",y = "Total Vaccinations")+
+    theme_fivethirtyeight()
+```
 
 11. (Using the same dataset as in 10.) Sometime we need to do some calculations on the data before plotting. For example, the below codes is to compare the total vaccines (including all types of vaccines) by date between the US and the EU
 
@@ -216,3 +316,61 @@ Do the follows.
 
 - Use `geom_point` compare the total vaccines (including all types of vaccines) by date between countries/regions in South America in 2021
 
+```{r}
+#Viewing the locations within the dataset.
+
+table(df$location)
+```
+
+
+```{r}
+#Cyprus was not included since it is located on the Mediterranean between Europe and Asia, but it is listed as a European country. In comparison, to the other countries/regions in Asia, Japan has the highest number of vaccinations by a massive margin.
+
+df %>% 
+  filter(location %in% c('Hong Kong', 'Japan', 'Nepal', 'South Korea')) %>% 
+  group_by(date, location) %>% 
+  summarise(total_vac2=sum(total_vaccinations, na.rm=TRUE)) %>% 
+  ggplot()+
+  geom_point(mapping=aes(x=date, 
+                         y=total_vac2, 
+                         color=location))+
+  labs(title = "Total Vaccinations by Country/Region in Asia",
+       caption = "The number of vaccinations in are compared across four
+       countries / regions in Asia.",
+      tag = "Figure 11",x = "date",y = "total_vaccinations")
+  
+```
+```{r}
+#Filtering by year and location, then using group_by and summarise to compare the total vaccines by South American nation. In 2021, Argentina and Chile had increased their total vaccines the most out of any country. Uruguay had few vaccinations compared to the other countries, but it has the smallest population. 
+
+df %>% 
+  filter(year(date) == '2021', location %in% c('Argentina', 'Chile', 'Ecuador', 'Peru' ,'Uruguay')) %>% 
+  group_by(date, location) %>% 
+  summarise(total_vac2=sum(total_vaccinations, na.rm=TRUE)) %>% 
+  ggplot()+
+  geom_point(mapping=aes(x=date, 
+                         y=total_vac2, 
+                         color=location))+
+  labs(title = "Total Vaccinations by South American Nation",
+       caption = "The number of vaccinations are compared
+       across five South American nations.",
+      tag = "Figure 12",x = "Date",y = "Total Vaccinations")
+```
+```{r}
+#(Optional) If you wanted to go into more detail and compare the different types of vaccines across countries, ggplot's `facet_wrap()` function can be applied at the end. This example was done for South American Countries.
+
+df %>% 
+  filter(location %in% c('Argentina', 'Chile', 'Ecuador', 'Peru' ,'Uruguay')) %>% 
+  group_by(date, location, vaccine) %>% 
+  summarise(total_vac2=sum(total_vaccinations, na.rm=TRUE)) %>% 
+  ggplot()+
+  geom_point(mapping=aes(x=date, 
+                         y=total_vac2, 
+                         color=vaccine))+facet_wrap(~`location`)+
+  labs(title = "Vaccines by South American Nation",
+       caption = "The number of vaccinations in Argentina in 2022 
+       were compared across 6 vaccines and 6 types of vaccines.",
+      tag = "Figure 13",x = "Date",y = "Total Vaccinations")+
+  theme_economist()
+
+```
