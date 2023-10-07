@@ -115,7 +115,7 @@ df %>%
   summarise(mean_job_salary = mean(salary_in_usd)) %>% 
   ggplot(aes(x=work_year, y = mean_job_salary))+
   geom_col()+
-  labs(title = "Average Salary", 
+  labs(title = "Average Salary over Time", 
        caption = "The average salary 
        is plotted from 2020 to 2022.", 
        tag = "Figure 1",x = "Work Year", y = " Avg. Salary")
@@ -159,7 +159,7 @@ df %>%
   summarise(avg_salary = mean(salary_in_usd)) %>% 
   ggplot(aes(x=company_location,y=avg_salary, color = company_location))+ 
   geom_col()+
-  labs(title = "Average Salary", 
+  labs(title = "Average Salary by Location", 
        caption = "The average salary 
        is compared across company locations", 
        tag = "Figure 4",x = "Country", y = " Avg. Salary")
@@ -171,7 +171,7 @@ df %>%
     summarise(mean_salary = mean(salary)) %>% 
     ggplot()+
     geom_col(aes(x = company_location, y = mean_salary, fill = company_size), position = 'dodge')+
-    labs(title = "Average Salary",
+    labs(title = "Average Salary by Company Size and Location",
          caption = "The average salary is compared by company size
          among the company locations.",
         tag = "Figure 5",x = "Country",y = " Avg. Salary")
