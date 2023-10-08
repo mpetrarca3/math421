@@ -14,3 +14,4 @@
 - [Assignment 7 Plot](billionaires.png)
 - [Assignment 7 Extra Credits](assignment7_extra_credits.html)
 - [Assignment 8](Assingment8.html)
+- [Assignment 9](assignment9.html)
