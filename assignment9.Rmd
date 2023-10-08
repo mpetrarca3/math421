@@ -60,13 +60,20 @@ library(dplyr)
 library(gganimate)
 library(gifski)
 
-
+df2 %>% 
+  filter(Country_code == "US"|
+           Country_code == "BR"|
+           Country_code == "IN") %>% 
+  ggplot(aes(x=Country_code,y=Cumulative_deaths))+
+  transition_reveal(along = Cumulative_deaths)
 ```
 
 
 3. Create the new variable (column) `death_per_cases` recording the number of deaths per cases (Hint: divide cumulative deaths by cumulative cases).  What are the three countries with the highest deaths per cases? 
 ```{r}
-
+df <- df %>%
+  mutate(death_per_cases = Cumulative_deaths/Cumulative_cases)
+df
 ```
 
 
