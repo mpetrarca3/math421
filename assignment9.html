@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Assignment 9: Visualization - Revealing a graph</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="assignment9_files/libs/clipboard/clipboard.min.js"></script>
+<script src="assignment9_files/libs/quarto-html/quarto.js"></script>
+<script src="assignment9_files/libs/quarto-html/popper.min.js"></script>
+<script src="assignment9_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="assignment9_files/libs/quarto-html/anchor.min.js"></script>
+<link href="assignment9_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="assignment9_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="assignment9_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="assignment9_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="assignment9_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Assignment 9: Visualization - Revealing a graph</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p><strong><em>How to do it?</em></strong>:</p>
+<ul>
+<li><p>Open the Rmarkdown file of this assignment (<a href="assignment9.Rmd">link</a>) in Rstudio.</p></li>
+<li><p>Right under each <strong>question</strong>, insert a code chunk (you can use the hotkey <code>Ctrl + Alt + I</code> to add a code chunk) and code the solution for the question.</p></li>
+<li><p><code>Knit</code> the rmarkdown file (hotkey: <code>Ctrl + Alt + K</code>) to export an html.</p></li>
+<li><p>Publish the html file to your Githiub Page.</p></li>
+</ul>
+<p><strong><em>Submission</em></strong>: Submit the link on Github of the assignment to Canvas</p>
+<hr>
+<p><strong>Notice:</strong> <em>In this assignment, all the plot should have title, caption, and axis labels. </em></p>
+<ol type="1">
+<li>Use the dataset by of covid 19 by WHO at https://covid19.who.int/WHO-COVID-19-global-data.csv. Find the three countries with the most numbers of deaths by Covid-19.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Importing the library and data. The data is saved to a dataframe.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'https://covid19.who.int/WHO-COVID-19-global-data.csv'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 8
+  Date_reported Country_code Country     WHO_region New_cases Cumulative_cases
+  &lt;date&gt;        &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;            &lt;dbl&gt;
+1 2020-01-03    AF           Afghanistan EMRO               0                0
+2 2020-01-04    AF           Afghanistan EMRO               0                0
+3 2020-01-05    AF           Afghanistan EMRO               0                0
+4 2020-01-06    AF           Afghanistan EMRO               0                0
+5 2020-01-07    AF           Afghanistan EMRO               0                0
+6 2020-01-08    AF           Afghanistan EMRO               0                0
+# ℹ 2 more variables: New_deaths &lt;dbl&gt;, Cumulative_deaths &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Hint:</p>
+<ul>
+<li><p>Use <code>filter</code> to select the most current date</p></li>
+<li><p>Pipe with <code>arrange(-Cumulative_deaths)</code> to rank the data by the number of cumulative deaths</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Using filter to list only the data from the final date of observation. Arrange was then used to list the countries in descending order of `Cumulative_deaths`. The countries with the highest number of cumulative deaths are the U.S., Brazil, and India.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date_reported <span class="sc">==</span> <span class="fu">max</span>(Date_reported)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>Cumulative_deaths) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 8
+  Date_reported Country_code Country       WHO_region New_cases Cumulative_cases
+  &lt;date&gt;        &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;          &lt;dbl&gt;            &lt;dbl&gt;
+1 2023-10-04    US           United State… AMRO               0        103436829
+2 2023-10-04    BR           Brazil        AMRO               0         37721749
+3 2023-10-04    IN           India         SEARO              0         44998838
+4 2023-10-04    RU           Russian Fede… EURO               0         23029404
+5 2023-10-04    MX           Mexico        AMRO               0          7690908
+6 2023-10-04    GB           The United K… EURO               0         24743787
+# ℹ 2 more variables: New_deaths &lt;dbl&gt;, Cumulative_deaths &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Use <code>transition_reveal</code> to make a plot revealing the number of deaths in the three countries with the most numbers of deaths</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Importing libraries then filtering by country. Although the variable `Country` was not used directly, `country code` is unique to each country and can be used in place of country in this instance.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gifski)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gganimate)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggthemes)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Country_code <span class="sc">==</span> <span class="st">"US"</span><span class="sc">|</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           Country_code <span class="sc">==</span> <span class="st">"BR"</span><span class="sc">|</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>           Country_code <span class="sc">==</span> <span class="st">"IN"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Date_reported,<span class="at">y=</span>Cumulative_deaths,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">color=</span>Country_code))<span class="sc">+</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> Cumulative_deaths),<span class="at">hjust =</span> <span class="sc">-</span>.<span class="dv">1</span>, <span class="at">size=</span><span class="dv">5</span>)<span class="sc">+</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_solarized</span>()<span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Deaths Compared Across Three Countries"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"The total number of deaths is compared between three countries."</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">tag =</span> <span class="st">"Figure 1"</span>,<span class="at">x =</span> <span class="st">"Date"</span>,<span class="at">y =</span> <span class="st">"Cumulative Deaths"</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    )<span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transition_reveal</span>(Date_reported)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="assignment9_files/figure-html/unnamed-chunk-3-1.gif" class="img-fluid"></p>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Create the new variable (column) <code>death_per_cases</code> recording the number of deaths per cases (Hint: divide cumulative deaths by cumulative cases). What are the three countries with the highest deaths per cases?</li>
+</ol>
+<p>Ans: The three countries are Yemen Sudan and Syrian Arab Republic.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Using the mutate function to add the column `death_per_cases` to the dataframe. The filter function was then used to filter by the last day of observations. Finally, the arrange function was used to list the countries by `death_per_cases` in descending order. The three countries are Yemen Sudan and Syrian Arab Republic.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">death_per_cases =</span> Cumulative_deaths<span class="sc">/</span>Cumulative_cases)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date_reported <span class="sc">==</span> <span class="fu">max</span>(Date_reported)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="sc">-</span>death_per_cases) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 9
+  Date_reported Country_code Country       WHO_region New_cases Cumulative_cases
+  &lt;date&gt;        &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;          &lt;dbl&gt;            &lt;dbl&gt;
+1 2023-10-04    YE           Yemen         EMRO               0            11945
+2 2023-10-04    SD           Sudan         EMRO               0            63993
+3 2023-10-04    SY           Syrian Arab … EMRO               0            57423
+4 2023-10-04    SO           Somalia       EMRO               0            27334
+5 2023-10-04    PE           Peru          AMRO               0          4520727
+6 2023-10-04    EG           Egypt         EMRO               0           516023
+# ℹ 3 more variables: New_deaths &lt;dbl&gt;, Cumulative_deaths &lt;dbl&gt;,
+#   death_per_cases &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Use <code>transition_reveal</code> to make a plot revealing the number of deaths per cases of the US, Italy and Mexico.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Filtering by country and then using the transition_reveal function to plot the number of deaths per cases.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Country <span class="sc">==</span> <span class="st">"United States of America"</span><span class="sc">|</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>           Country <span class="sc">==</span> <span class="st">"Italy"</span><span class="sc">|</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>           Country <span class="sc">==</span> <span class="st">"Mexico"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Date_reported,<span class="at">y=</span>death_per_cases, <span class="at">color =</span> Country))<span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> death_per_cases),<span class="at">hjust =</span> <span class="sc">-</span>.<span class="dv">1</span>, <span class="at">size=</span><span class="dv">5</span>)<span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Deaths per Cases among Three Countries"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"The number of deaths per cases is compared between three countries."</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">tag =</span> <span class="st">"Figure 2"</span>,<span class="at">x =</span> <span class="st">"Date"</span>,<span class="at">y =</span> <span class="st">"Deaths per Cases"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    )<span class="sc">+</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_calc</span>()<span class="sc">+</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transition_reveal</span>(Date_reported)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 3 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 3 rows containing missing values (`geom_text()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 3 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 3 rows containing missing values (`geom_text()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values (`geom_text()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_text()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_text()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="assignment9_files/figure-html/unnamed-chunk-5-1.gif" class="img-fluid"></p>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Import the following data https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Importing data and saving it to a dataframe.</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/vaccinations.csv"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 16
+  location    iso_code date       total_vaccinations people_vaccinated
+  &lt;chr&gt;       &lt;chr&gt;    &lt;date&gt;                  &lt;dbl&gt;             &lt;dbl&gt;
+1 Afghanistan AFG      2021-02-22                  0                 0
+2 Afghanistan AFG      2021-02-23                 NA                NA
+3 Afghanistan AFG      2021-02-24                 NA                NA
+4 Afghanistan AFG      2021-02-25                 NA                NA
+5 Afghanistan AFG      2021-02-26                 NA                NA
+6 Afghanistan AFG      2021-02-27                 NA                NA
+# ℹ 11 more variables: people_fully_vaccinated &lt;dbl&gt;, total_boosters &lt;dbl&gt;,
+#   daily_vaccinations_raw &lt;dbl&gt;, daily_vaccinations &lt;dbl&gt;,
+#   total_vaccinations_per_hundred &lt;dbl&gt;, people_vaccinated_per_hundred &lt;dbl&gt;,
+#   people_fully_vaccinated_per_hundred &lt;dbl&gt;,
+#   total_boosters_per_hundred &lt;dbl&gt;, daily_vaccinations_per_million &lt;dbl&gt;,
+#   daily_people_vaccinated &lt;dbl&gt;, daily_people_vaccinated_per_hundred &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Use <code>transition_reveal</code> to plot the total vaccinations per hundred by level of income. Hint: the levels of income are identified in the <code>location</code> variable. Put a short comment on the caption of the plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Viewing the levels of income within the variable `location`. The names function was applied to view only the names of the categories.</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>location <span class="sc">%&gt;%</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">table</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] "Afghanistan"                      "Africa"                          
+  [3] "Albania"                          "Algeria"                         
+  [5] "Andorra"                          "Angola"                          
+  [7] "Anguilla"                         "Antigua and Barbuda"             
+  [9] "Argentina"                        "Armenia"                         
+ [11] "Aruba"                            "Asia"                            
+ [13] "Australia"                        "Austria"                         
+ [15] "Azerbaijan"                       "Bahamas"                         
+ [17] "Bahrain"                          "Bangladesh"                      
+ [19] "Barbados"                         "Belarus"                         
+ [21] "Belgium"                          "Belize"                          
+ [23] "Benin"                            "Bermuda"                         
+ [25] "Bhutan"                           "Bolivia"                         
+ [27] "Bonaire Sint Eustatius and Saba"  "Bosnia and Herzegovina"          
+ [29] "Botswana"                         "Brazil"                          
+ [31] "British Virgin Islands"           "Brunei"                          
+ [33] "Bulgaria"                         "Burkina Faso"                    
+ [35] "Burundi"                          "Cambodia"                        
+ [37] "Cameroon"                         "Canada"                          
+ [39] "Cape Verde"                       "Cayman Islands"                  
+ [41] "Central African Republic"         "Chad"                            
+ [43] "Chile"                            "China"                           
+ [45] "Colombia"                         "Comoros"                         
+ [47] "Congo"                            "Cook Islands"                    
+ [49] "Costa Rica"                       "Cote d'Ivoire"                   
+ [51] "Croatia"                          "Cuba"                            
+ [53] "Curacao"                          "Cyprus"                          
+ [55] "Czechia"                          "Democratic Republic of Congo"    
+ [57] "Denmark"                          "Djibouti"                        
+ [59] "Dominica"                         "Dominican Republic"              
+ [61] "Ecuador"                          "Egypt"                           
+ [63] "El Salvador"                      "England"                         
+ [65] "Equatorial Guinea"                "Estonia"                         
+ [67] "Eswatini"                         "Ethiopia"                        
+ [69] "Europe"                           "European Union"                  
+ [71] "Faeroe Islands"                   "Falkland Islands"                
+ [73] "Fiji"                             "Finland"                         
+ [75] "France"                           "French Polynesia"                
+ [77] "Gabon"                            "Gambia"                          
+ [79] "Georgia"                          "Germany"                         
+ [81] "Ghana"                            "Gibraltar"                       
+ [83] "Greece"                           "Greenland"                       
+ [85] "Grenada"                          "Guatemala"                       
+ [87] "Guernsey"                         "Guinea"                          
+ [89] "Guinea-Bissau"                    "Guyana"                          
+ [91] "Haiti"                            "High income"                     
+ [93] "Honduras"                         "Hong Kong"                       
+ [95] "Hungary"                          "Iceland"                         
+ [97] "India"                            "Indonesia"                       
+ [99] "Iran"                             "Iraq"                            
+[101] "Ireland"                          "Isle of Man"                     
+[103] "Israel"                           "Italy"                           
+[105] "Jamaica"                          "Japan"                           
+[107] "Jersey"                           "Jordan"                          
+[109] "Kazakhstan"                       "Kenya"                           
+[111] "Kiribati"                         "Kosovo"                          
+[113] "Kuwait"                           "Kyrgyzstan"                      
+[115] "Laos"                             "Latvia"                          
+[117] "Lebanon"                          "Lesotho"                         
+[119] "Liberia"                          "Libya"                           
+[121] "Liechtenstein"                    "Lithuania"                       
+[123] "Low income"                       "Lower middle income"             
+[125] "Luxembourg"                       "Macao"                           
+[127] "Madagascar"                       "Malawi"                          
+[129] "Malaysia"                         "Maldives"                        
+[131] "Mali"                             "Malta"                           
+[133] "Mauritania"                       "Mauritius"                       
+[135] "Mexico"                           "Moldova"                         
+[137] "Monaco"                           "Mongolia"                        
+[139] "Montenegro"                       "Montserrat"                      
+[141] "Morocco"                          "Mozambique"                      
+[143] "Myanmar"                          "Namibia"                         
+[145] "Nauru"                            "Nepal"                           
+[147] "Netherlands"                      "New Caledonia"                   
+[149] "New Zealand"                      "Nicaragua"                       
+[151] "Niger"                            "Nigeria"                         
+[153] "Niue"                             "North America"                   
+[155] "North Macedonia"                  "Northern Cyprus"                 
+[157] "Northern Ireland"                 "Norway"                          
+[159] "Oceania"                          "Oman"                            
+[161] "Pakistan"                         "Palestine"                       
+[163] "Panama"                           "Papua New Guinea"                
+[165] "Paraguay"                         "Peru"                            
+[167] "Philippines"                      "Pitcairn"                        
+[169] "Poland"                           "Portugal"                        
+[171] "Qatar"                            "Romania"                         
+[173] "Russia"                           "Rwanda"                          
+[175] "Saint Helena"                     "Saint Kitts and Nevis"           
+[177] "Saint Lucia"                      "Saint Vincent and the Grenadines"
+[179] "Samoa"                            "San Marino"                      
+[181] "Sao Tome and Principe"            "Saudi Arabia"                    
+[183] "Scotland"                         "Senegal"                         
+[185] "Serbia"                           "Seychelles"                      
+[187] "Sierra Leone"                     "Singapore"                       
+[189] "Sint Maarten (Dutch part)"        "Slovakia"                        
+[191] "Slovenia"                         "Solomon Islands"                 
+[193] "Somalia"                          "South Africa"                    
+[195] "South America"                    "South Korea"                     
+[197] "South Sudan"                      "Spain"                           
+[199] "Sri Lanka"                        "Sudan"                           
+[201] "Suriname"                         "Sweden"                          
+[203] "Switzerland"                      "Syria"                           
+[205] "Taiwan"                           "Tajikistan"                      
+[207] "Tanzania"                         "Thailand"                        
+[209] "Timor"                            "Togo"                            
+[211] "Tokelau"                          "Tonga"                           
+[213] "Trinidad and Tobago"              "Tunisia"                         
+[215] "Turkey"                           "Turkmenistan"                    
+[217] "Turks and Caicos Islands"         "Tuvalu"                          
+[219] "Uganda"                           "Ukraine"                         
+[221] "United Arab Emirates"             "United Kingdom"                  
+[223] "United States"                    "Upper middle income"             
+[225] "Uruguay"                          "Uzbekistan"                      
+[227] "Vanuatu"                          "Venezuela"                       
+[229] "Vietnam"                          "Wales"                           
+[231] "Wallis and Futuna"                "World"                           
+[233] "Yemen"                            "Zambia"                          
+[235] "Zimbabwe"                        </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Filtering by income level within the column `location`. A line plot is then created to represent the total vaccinations per hundred by income level. The high income and upper middle income levels displayed very similar results. There does appear to be a correlation between income level and `total_vaccinations_per_hundred`.</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">==</span> <span class="st">"Upper middle income"</span><span class="sc">|</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>           location <span class="sc">==</span> <span class="st">"Lower middle income"</span><span class="sc">|</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>           location <span class="sc">==</span> <span class="st">"High income"</span><span class="sc">|</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>           location <span class="sc">==</span> <span class="st">"Low income"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>date,<span class="at">y=</span>total_vaccinations_per_hundred,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">color=</span>location))<span class="sc">+</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> total_vaccinations_per_hundred),<span class="at">hjust =</span> <span class="sc">-</span>.<span class="dv">1</span>, <span class="at">size=</span><span class="dv">5</span>)<span class="sc">+</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Vaccinations by Class"</span>,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Total vaccinations per 100 people were compared by class."</span>,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">tag =</span> <span class="st">"Figure 3"</span>,<span class="at">x =</span> <span class="st">"Date"</span>,<span class="at">y =</span> <span class="st">"Total Vaccinations per 100"</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    )<span class="sc">+</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_fivethirtyeight</span>()<span class="sc">+</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transition_reveal</span>(date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="assignment9_files/figure-html/unnamed-chunk-8-1.gif" class="img-fluid"></p>
+</div>
+</div>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
