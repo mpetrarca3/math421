@@ -46,12 +46,16 @@ head(df1)
 ```
 
 ```{r}
+#Viewing the dataframe.
+
 head(df2)
 ```
 
 2.  We will merge these two datasets in one for our analysis. We will use the `inner_join()` function to join the two datasets into one new datasets where the primary keys are Country and Date. First we need to change the names of the two datasets so that they have the same name for country and date. In dataset 1, change the name of the `location` to `Country`. In dataset 2, change the name of the variable `Date_reported` to `date`
 
 ```{r}
+#Creating a column for country thats equal to location and then removing the duplicate location column. This process was repeated for the date column in dataset 2. I'm sure there's many other ways of doing this such as using the rename function, but this was the first method that came to mind.
+
 df1 <- df1 %>% 
   mutate(COUNTRY = location) %>% 
   select(-location)
@@ -65,14 +69,20 @@ head(df)
 ```
 
 ```{r}
+#Viewing the variable names in the new dataframe.
+
 names(df)
 ```
 
 3.  In dataset 2 and variable `Country` change `United States of America` to `United States` (You can use `str_replace`)
 
 ```{r}
+#Changing the name of the category 'United States of America' to 'United States' to match the name in the other dataframe. The changes are saved to the column in the dataframe.
+
 df2$COUNTRY <- df2$COUNTRY %>%
   str_replace("United States of America","United States")
+
+#Viewing the categories within the new country column.
 
 names(table(df2$COUNTRY))
   
@@ -81,24 +91,10 @@ names(table(df2$COUNTRY))
 4.  Use `inner_join(data1, data2, by = c('Country','date')` to create a new dataset.
 
     ```{r}
+    #Using inner join to merge the two dataframes on  `COUNTRY` and `date`. This action is then saved to a dataset.
+
     df <- inner_join(df1,df2, by = c('COUNTRY','date'))
     head(df)
     ```
 
 For more about joining data, see this datacamp course: <https://app.datacamp.com/learn/courses/joining-data-with-dplyr-in-r>
-
-5.  In the new dataset, create a variable `death_per_vac` by dividing the `Cumulative_deaths` by `total_vaccinations`.
-
-    ```{r}
-    #No dataset contains the variable `Cumulative_deaths` and there are no variables representing the number of deaths. Therefore, this can not be done.
-    ```
-
-6.  Plot the `death_per_vac` by `date` for the United State using `geom_point`.
-
-7.  Use the log transformation for the plot above for better view. Hint: add to the code above `+scale_y_continuous(trans='log')`
-
-8.  Filter the plot above for July to current date only. Give your comments.
-
-9.  Do the above analysis to other countries or continents. Give your comments.
-
-10. Do you have any other analysis for the effectiveness of the vaccine covid?
