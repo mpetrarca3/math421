@@ -1,0 +1,197 @@
+
+---
+output: 
+  html_document:
+  pdf_document: default
+  word_document: default
+title: "Assignment 11: Predictive Modeling - Universal Framework"
+---
+
+***How to do it?***: 
+
+- Open the Rmarkdown file of this assignment ([link](assignment11.Rmd)) in Rstudio. 
+
+- Right under each **question**, insert  a code chunk (you can use the hotkey `Ctrl + Alt + I` to add a code chunk) and code the solution for the question. 
+
+- `Knit` the rmarkdown file (hotkey: `Ctrl + Alt + K`) to export an html.  
+
+-  Publish the html file to your Githiub Page. 
+
+***Submission***: Submit the link on Github of the assignment to Blackboard.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+
+-------
+
+1. Install the package mlbench and use the follows to import the data
+
+```{r}
+library(mlbench)
+library(tidyverse)
+data(PimaIndiansDiabetes)
+df <- tibble(PimaIndiansDiabetes)
+```
+
+Train and Test a decision tree and a random forest with caret. Plot the variable importance of these models. 
+
+```{r}
+#Importing Library and partitioning the dataset.
+
+library(caret)
+
+set.seed(2023)
+
+df <- df %>% 
+
+  rename(target = diabetes)
+
+partition <- createDataPartition(df$target, p = .80, 
+
+                                  list = FALSE)
+
+trainDf <- df[ partition,]
+
+testDf <- df[-partition,]
+```
+
+```{r}
+#Creating a decision tree and confusion matrix to display accuracy.
+
+tree <- train(target~., data=trainDf, 
+                method = "rpart2",
+                maxdepth=3)
+pred <- predict(tree, testDf)
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+cm$overall[1]
+```
+
+
+```{r}
+#Creating random forest and confusion matrix to display accuracy.
+
+forest <- train(target~., data=trainDf, 
+                method = "rf",
+                ntree = 1000) 
+pred <- predict(forest, testDf)
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+cm$overall[1]
+
+```
+
+```{r}
+#Plotting the variable importance of the decision tree.
+
+plot(varImp(tree))
+```
+
+```{r}
+#Plotting the variable importance of the random forest.
+
+plot(varImp(forest))
+```
+
+2. Train and Test a `glmnet` model. Plot the variable importance of the model. 
+
+```{r}
+#Importing the library 'glmnet' and creating a decision tree with the method set to glmnet
+
+library(glmnet)
+
+glmnetModel <- train(target~., data=trainDf, 
+                method = "glmnet",
+                maxdepth = 3) 
+pred <- predict(glmnetModel, testDf)
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+cm$overall[1]
+
+```
+```{r}
+#Displaying the entire confusion matrix for the glmnet model.
+cm
+```
+
+
+```{r}
+#Plotting the variable importance of the glmnet model.
+
+plot(varImp(glmnetModel))
+```
+
+
+3. Train and test two models that are not `ranger`, `glmnet` or `rpart`  with caret. If possible, plot the variable importance of the model. 
+
+```{r}
+#Model 1: A random forest with Partial Least Squares (PLS). Note the train control function was implemented with the method repeated cv to repeat the cross validation on the training data.
+
+set.seed(42)
+
+ctrl <- trainControl(method = "repeatedcv",
+                     repeats = 3, classProbs = TRUE)
+
+tunedForest <- train(target~., data=trainDf, 
+                method = "pls",
+                preProc = c("center","scale"),
+                tuneLength = 7,
+                ntree = 1000,
+                maxdepth = 3,
+                trControl = ctrl,
+                metric = "ROC") 
+pred <- predict(tunedForest, testDf)
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+tunedForest
+
+```
+```{r}
+#Plotting the first forest model. This graph demonstrates that the training accuracy was best with 4 components. Therefore, the number of components used in the model is 4.
+
+ggplot(tunedForest)
+```
+```{r}
+#Plotting the variable importance for the first model.
+
+plot(varImp(tunedForest))
+```
+```{r}
+#Viewing the accuracy of the first random forest model.
+
+cm$overall[1]
+```
+```{r}
+#Model 2: method = 'rda'  Regularized Discriminant Analysis was used as the method for the second forest. This method was used to find the model with the highest accuracy using the best combination of the parameters λ and γ. 
+
+set.seed(42)
+
+ctrl <- trainControl(method = "repeatedcv",
+                     repeats = 3, classProbs = TRUE)
+
+tunedForest2 <- train(target~., data=trainDf, 
+                method = "rda",
+                preProc = c("center","scale"),
+                trControl = ctrl,
+                maxdepth =3,
+                ntrees = 1000)
+
+pred <- predict(tunedForest2, testDf)
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+tunedForest2
+
+```
+```{r}
+#Displaying the accuracy of the final model.
+
+cm$overall[1]
+```
+```{r}
+#Plotting the model 
+
+ggplot(tunedForest2)
+```
+```{r}
+#The variable importance is not possible for the second model, therefore the entire model was plotted instead.
+```
+
