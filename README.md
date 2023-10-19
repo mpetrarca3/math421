@@ -56,6 +56,10 @@ editor: visual
 
 \- [Assignment 11](assignment11.html)
 
+#### Assignment 12 (Modeling: Tuning)
+
+\- [Assignment 12](assignment12.html)
+
 ### Extra Credit Assignments
 
 \- [Assignment 4 Extra Credits](assignment4_extra_credits.html)
