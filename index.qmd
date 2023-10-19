@@ -52,9 +52,13 @@ editor: visual
 
 \- [Assignment 10](Assignment10.html)
 
-#### **Assignment 11 (Predictive Modeling: Basics)**
+#### Assignment 11 (Predictive Modeling: Basics)
 
 \- [Assignment 11](assignment11.html)
+
+#### **Assignment 12 (Modeling: Tuning)**
+
+\- [Assignment 12](Assignment12.html)
 
 ### Extra Credit Assignments
 

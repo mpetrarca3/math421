@@ -1,0 +1,203 @@
+
+---
+output: 
+  html_document:
+  pdf_document: default
+  word_document: default
+title: "Assignment 12: Predictive Modeling - Part 3"
+---
+
+***How to do it?***: 
+
+- Open the Rmarkdown file of this assignment ([link](assignment12.Rmd)) in Rstudio. 
+
+- Right under each **question**, insert  a code chunk (you can use the hotkey `Ctrl + Alt + I` to add a code chunk) and code the solution for the question. 
+
+- `Knit` the rmarkdown file (hotkey: `Ctrl + Alt + K`) to export an html.  
+
+-  Publish the html file to your Githiub Page. 
+
+***Submission***: Submit the link on Github of the assignment to Blackboard.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+
+1. Use the `PimaIndiansDiabetes` dataset. Use 15% data for testing. Use cross-validation with of 7 folds to tune random forest `(method='ranger')`.  What are the parameters that produce the greatest accuracy? What is the testing accuracy.
+
+Ans: The parameters that produced the greatest accuracy are: mtry = 2, splitrule = gini, and min.node.size = 9.
+
+The testing accuracy is 0.7734340.
+
+
+```{r}
+# Importing libraries and data. The data is then saved to a dataframe.
+
+library(mlbench)
+library(tidyverse)
+data(PimaIndiansDiabetes)
+df <- tibble(PimaIndiansDiabetes)
+df
+```
+```{r}
+# Importing library and partitioning the dataset.
+
+library(caret)
+
+set.seed(2023)
+
+df <- df %>% 
+
+  rename(target = diabetes)
+
+partition <- createDataPartition(df$target, p = .85, 
+
+                                  list = FALSE)
+
+trainDf <- df[ partition,]
+
+testDf <- df[-partition,]
+
+```
+
+```{r}
+# Specifing to cross validate with 7 folds with the 'trainControl' function. The parameters for the number of trees, splitrule, and minimum node size were all specified and saved to the model's `tuneGrid` parameter.
+
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 7)
+
+tuneGrid = expand.grid(mtry = 2:4,
+                       splitrule = c('gini', 'extratrees'),
+                       min.node.size = c(1:10))
+
+forest <- train(target~., data=trainDf, 
+              method = "ranger", 
+              trControl = ctrl,
+              tuneGrid = tuneGrid)
+
+pred <- predict(forest, testDf)
+
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+forest
+```
+
+```{r}
+# Displaying the confusion matrix from the testing data.
+
+cm
+```
+
+
+```{r}
+# The parameters that produced the greatest accuracy are: mtry = 2, splitrule = gini, and min.node.size = 9. When the parameters are set at these values the accuracy is 0.7734340
+
+# Plotting the random forest
+
+plot(forest)
+```
+
+2. Use the `PimaIndiansDiabetes` dataset. Go to https://topepo.github.io/caret/available-models.html and pick a classification model.  Tune the classification model using cross-validation of 7 folds. 
+
+```{r}
+# Importing library, setting seed and parameters. The max depth was set at a value of 3 and the number of trees was set at 1000. The AdaBag model was used.
+
+library(adabag)
+
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 7)
+
+tuneGrid = expand.grid(maxdepth = 3,
+              mfinal=1000)
+
+adaBagModel <- train(target~., data=trainDf, 
+              method = "AdaBag", 
+              trControl = ctrl,
+              tuneGrid = tuneGrid)
+
+pred <- predict(adaBagModel, testDf)
+
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+adaBagModel
+
+```
+```{r}
+# Displaying the confusion matrix after evaluating the model on the testing data. The accuracy of this model is evaluated at 0.7739 on the test data.
+
+cm
+```
+
+3. (Model Comparison) Use the `PimaIndiansDiabetes` dataset. Pick two models at [this link](https://topepo.github.io/caret/available-models.html) to compare using 7-fold cross validation method. Evaluate the accuracy of the final model on the test data. 
+
+```{r}
+# The bayesglm method was used for the first model. This is a generalized linear model for classification, and there are no parameters for this model. In the `trControl` parameter, cross validation was specified at 7. The accuracy of this model has been evaluated on the testing data at a value of 0.7739 (on the testing data).
+
+library(arm)
+
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 7)
+
+
+forest <- train(target~., data=trainDf, 
+              method = "bayesglm", 
+              trControl = ctrl)
+
+pred <- predict(forest, testDf)
+
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+forest
+
+```
+
+```{r}
+#Displaying the confusion matrix after evaluating the model on the testing data. The accuracy of the model is evaluated at 0.7739 from the test data.
+
+cm
+```
+
+
+```{r}
+#Importing the library 'ada' and setting seed. Seven cross validations were then set for the `trControl` parameter. The max depth, number of iterations, and learing rate were all specified in the `tuneGrid` parameter. The accuracy is displayed at the end. The accuracy is again 0.7739 despite the confusion matrix changing. This is because the sum of false negatives and false positives still equals 26.
+
+library(ada)
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 7)
+
+tuneGrid = expand.grid(maxdepth = 3,
+              iter=20, nu = 0.05)
+
+
+adaTree <- train(target~., data=trainDf, 
+              method = "ada", 
+              trControl = ctrl,
+              tuneGrid = tuneGrid)
+
+pred <- predict(adaTree, testDf)
+
+cm <- confusionMatrix(data = pred, reference = testDf$target, positive = "pos")
+
+adaTree
+
+```
+```{r}
+# Displaying the confusion matrix after evaluating the model on the test data.
+
+cm
+```
+
+
+```{r}
+# Both models ended up with the same testing accuracy when evaluated with the test data. It is not which model is better; however the first had a slightly higher value for Kappa. This could be due to choosing two methods that are similar and then comparing them.
+```
+
