@@ -76,4 +76,4 @@ editor: visual
 
 ### Midterm
 
-\= [Midterm](MP_Math_421_Midterm.html)
+\- [Midterm](MP_Math_421_Midterm.html)
