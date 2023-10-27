@@ -1,0 +1,995 @@
+---
+title: "MidTerm"
+output: html_document
+date: "2023-10-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## I. Data Wranggling
+
+1. Download the data file `hdd0318cy.sas7bdat`.  
+
+```{r}
+# This file was downloaded to the computer's 'downloads' file and then moved to the same file as this R Markdown.
+```
+
+
+2. Use `read_sas` in library `haven` to read the data. 
+
+```{r}
+# Importing the library 'haven' and using it's built-in read_sas function to save the data to a dataframe.
+
+library(haven)
+
+df <- read_sas('hdd0318cy.sas7bdat')
+
+head(df)
+```
+
+    
+3. Filter the data to have only patients of the year 2018 (`yod=18`)
+
+```{r}
+# Using filter to have only patients in the year 2018.
+library(dplyr)
+df <- df %>% filter(yod == 18)
+
+head(df)
+```
+    
+4. Select to work with only following variables: 
+
+```{r, eval=FALSE}
+                      "yod", "payfix","pay_ub92","age",  
+                      "sex","raceethn","provider","moa", 
+                      "yoa","mod","admtype", "asource" , 
+                      "preopday" ,"los", "service" , "icu","ccu",    
+                      "dispub92", "payer"  ,"drg","trandb", 
+                      "randbg","randbs","orr", "anes","seq",   
+                      "lab","dtest", "ther","blood","phar", 
+                      "other","patcon","bwght","total","tot" ,  
+                      "ecodub92","b_wt","pt_state","diag_adm","ancilar" ,
+                      "campus","er_fee","er_chrg","er_mode","obs_chrg",
+                      "obs_hour","psycchrg","nicu_day"
+```
+ 
+
+*Notice*:  You may want to save the current data to your computer for easy access later.  To save the data file use `write_csv(df, 'midterm.csv')`, for example.  
+
+```{r}
+# Using the select function to drop any unwanted columns from the dataframe. The changes were saved to the dataframe, and the dataframe was then saved as a csv file to the computer.
+
+library(tidyverse)
+
+df <- df %>% select("yod", "payfix","pay_ub92","age",  
+                      "sex","raceethn","provider","moa", 
+                      "yoa","mod","admtype", "asource" , 
+                      "preopday" ,"los", "service" , "icu","ccu",    
+                      "dispub92", "payer"  ,"drg","trandb", 
+                      "randbg","randbs","orr", "anes","seq",   
+                      "lab","dtest", "ther","blood","phar", 
+                      "other","patcon","bwght","total","tot" ,  
+                      "ecodub92","b_wt","pt_state","diag_adm","ancilar" ,
+                      "campus","er_fee","er_chrg","er_mode","obs_chrg",
+                      "obs_hour","psycchrg","nicu_day")
+
+write_csv(df, 'midterm.csv')
+
+head(df)
+
+```
+
+5. What are variables that have missing values?
+
+```{r}
+# Using the is.na() function to find all the missing values in the dataframe. ColSums was piped at the end to count the number of NA's by column. The variables that have missing values in NA form are `payfix`, `preopday`, `obs_hour`, and `nicu_day`.
+
+df %>% 
+  is.na %>% 
+  colSums()
+```
+
+
+6. Remove all variables with missing values. 
+
+```{r}
+# Using the select function to remove the columns from the data frame. The changes are saved.
+
+df <- df %>% select(-c("payfix","preopday","obs_hour","nicu_day"))
+
+# Displaying the changes to the dataframe; the four columns with missing values were removed.
+
+colSums(is.na(df))
+```
+
+7. Refer to the data description in the file `HDD2015-18cy6-20-19.docx`, which variable recording the month of admission?, which variable recording the month of discharge?
+
+```{r}
+# From the files Description, the variable `moa` records the month of admission. On the other hand, the variable that records the month of discharge is `mod`.
+```
+
+8. Which month admitted the most number of patients? Which month admitted the most number of male patients?
+
+```{r}
+
+# Filtering by gender and then using the group_by function to group the data by month. The table function was then used to find the months in order of male admissions. The month with the highest number of male admitted patients is October.
+
+maleByMonth <- df %>% filter(sex == 1) %>% 
+  group_by(moa)
+  
+table(maleByMonth$moa) %>% 
+  sort(descending = FALSE)
+
+  
+```
+
+9. Which month has the most number of teenage female patients?
+
+```{r}
+# Using filter and group by to find the number of teenage female patients by month. The month with the highest number of teenage female patients is march. 
+
+femaleByMonth<- df %>% filter(sex == 2 & (age < 20 & age > 12)) %>% 
+  group_by(moa)
+
+table(femaleByMonth$moa) %>% 
+  sort(decreasing = TRUE)
+  
+  
+  
+```
+
+10. Which provider has the most number of female patients in October?
+
+```{r}
+# The provider with the most female patients in October was, 7705 (Rhode Island Hospital). They admitted a total of 7,205 patients that month.
+
+octProviders <- df %>% filter(moa == 10 & sex == 2) %>% 
+  group_by(provider)
+
+table(octProviders$provider) %>% 
+  sort(decreasing = TRUE)
+```
+
+11. Are female patients older than male patients, on average? 
+
+```{r}
+# Using group_by and summarise in together to find the average age by gender. The average age of a male patient is ~51.49705, while the average age for a female patient is ~50.86232. Therefore, on average, male patients are older.
+
+df %>% group_by(sex) %>% 
+  summarise(avg_age = mean(age))
+```
+
+12. Calculate the average age of patients by months. Which month has the oldest patients on average age?
+
+```{r}
+# Using group by and summarise to find the average age of admitted patients by month. The arrange function was piped at the end to list the months by age in decreasing order. The month with the oldest patients on average is January; the average age that month is approximately 51.79229.
+
+df %>% group_by(moa) %>% 
+  summarise(avg_age = mean(age)) %>% 
+  arrange(-avg_age)
+
+```
+
+13. What is the name of the provider that has the highest total charge?
+
+```{r}
+# The provider with the highest charge ever was 7214 (Women and Infants) with a total charge of $3,402,056.
+
+df %>% group_by(provider) %>% 
+  summarise(max_tot = max(tot)) %>% 
+  arrange(-max_tot)
+```
+```{r}
+# If you were wondering which provider had the highest total charge on average. The provider with the highest total charge on average is 7215 (Bradley) with an average total charge of $69,945.55.
+
+df %>% group_by(provider) %>% 
+  summarise(avg_tot = mean(tot)) %>% 
+  arrange(-avg_tot)
+```
+
+14. What is the name of the provider that has the least total charge for teenage male on average?
+
+```{r}
+# The provider with the least total charge for the teenage male on average is 7206 (Roger Williams). The average total charge there for teenage male patients was $10,360.44.
+
+df %>% filter(sex == 1 & (age < 20 & age > 12)) %>% 
+  group_by(provider) %>% 
+  summarise(avg_tot = mean(tot)) %>% 
+  arrange(avg_tot)
+```
+
+15. Create a season (Spring, Summer, Fall, Winter) variable. Calculate the length of stays by season.  Which season has the longest length of stays on average?
+
+```{r}
+# Using the case_when function to create a season variable. This variable is determined by the month of arrival.
+
+df$season <- case_when(df$moa <4 ~ 'Winter',
+                       df$moa <7 ~ 'Spring',
+                       df$moa <=9 ~'Summer',
+                       TRUE ~ 'Fall')
+
+head(df)
+```
+
+```{r}
+# The fall season had the longest length of stay on average. This was determined with the group_by() and summarise() combo to find the average length of stay by season. The arrange function was used at the end to list the seasons in order of longest average length of stay.
+
+df %>% group_by(season) %>% 
+  summarise(mean_length = mean(los)) %>% 
+  arrange(-mean_length)
+```
+
+
+16. On average, how much a 20 year-old male get charged for staying 1 day in the Fall season?
+
+```{r}
+# Filtering for observations that are male, age 20, and season is fall. The summarise function was used to find the average charge, length of stay for the filtered dataframe. By dividing the average charge by the average length of stay, the average charge per day can be calculated. On average, a 20 year-old male will get charged $6,058.25 per night in the fall season.
+
+df %>% filter(sex == 1 & age == 20 & season == "Fall") %>% 
+  summarise(avg_charge = mean(tot), avg_stay = mean(los), avg_day_charge = avg_charge/avg_stay)
+```
+
+
+17. Write a paragraph to summarize the section and give your comments on the results. You could do some other calculations to support your points. 
+
+  From the calculations made on the dataframe, there are serverel patterns that are worth noting. First, there appears to be a positive correlation between the variables `season` and `los` (length of stay). The seasons at the end of the year had a higher length of stay than the ones at the beginning of the year. However, the average length of stay for all seasons was close to 5 days. For the second key observation, the most expensive provider on average in the dataset is Bradley (7215) while the least expensive provider on average is Butler (7216). The average total charge per stay at Bradley is 69945.55 dollars while the average charge per stay at Butler costs 17781.83 dollars. Next, the month with the highest number of male admitted patients is October. For Females, the month with the highest number of admitted patients was January. Finally, the average age of admitted patients is roughly 51 years old. For males, the average age was 51.49705 while for females the average age was 50.86232.			
+  
+```{r}
+# Finding the month with the most female patients admitted to support key points.
+
+femaleAdmByMonth <- df %>% filter(sex == 2) %>% 
+  group_by(moa)
+
+table(femaleAdmByMonth$moa) %>% 
+  sort(decreasing = TRUE)
+
+```
+
+-------
+
+## II. Data Visualization
+
+Continue with the data from part I. 
+
+1. Provides at least 10 meaningful plots. Comments on the plots. All plots should have title, caption, appropriate labels on x and y-axis.
+
+Plot Ideas: `facet_wrap()`, `geom_bar()`, `geom_point()`, `geom_line()`, `geom_smooth()`, `geom_col()`
+
+```{r}
+# Plot 1: Length of Stay by Age. The following graph plots the average length of stay by age. The average length of stay is highest for patients that are around 15 years old and for patients that are around 105 years old. From the age range of approximately 30 to 90, the average length of stay varied between 4 and 5 days.
+
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+
+df %>% group_by(age) %>% 
+  summarise(avg_los = mean(los)) %>% 
+  ggplot()+ 
+  geom_line(mapping=aes(x=age,y=avg_los),
+           color = 'red')+
+  labs(title = "Average Length of Stay by Age",
+       caption = "The average length of stay is compared across age.",
+      tag = "Figure 1",x = "Age",y = "Average Length of Stay",
+    )+
+  theme_solarized()
+```
+
+```{r}
+# Converting the names of providers from number to the real name. Note: The class of `provider` was already in the form character; therefore, the class did not need to be changed.
+
+provider_name <- df$provider %>% str_replace("7201","Newport") %>% 
+  str_replace("7202", "St. Joseph Health Services of RI") %>% 
+  str_replace("7203", "Memorial") %>% 
+  str_replace("7204", "Miriam") %>% 
+  str_replace("7205", "Rhode Island Hospital") %>% 
+  str_replace("7206", "Roger Williams") %>% 
+  str_replace("7209", "South County") %>% 
+  str_replace("7210", "Kent County") %>% 
+  str_replace("7211", "Westerly") %>% 
+  str_replace("7212", "Rehab of RI") %>% 
+  str_replace("7213", "Landmark Medical Center") %>% 
+  str_replace("7214", "Women and Infants") %>% 
+  str_replace("7215","Bradley") %>% 
+  str_replace("7216","Butler")
+
+# Adding the column to the dataframe with mutate.
+
+df1 <- df %>% mutate(provider_name = provider_name)
+
+head(df1)
+
+```
+
+
+```{r}
+# Plot 2: Average Total Charge by Provider. The following graph compares the average total charge across all providers in the dataset. Bradley was by far the most expensive provided with an average total charge exceeding $60,000 while Butler was the least expensive provider with an average total charge below $20,000. 
+
+df1 %>% group_by(provider_name) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+ 
+  geom_col(mapping=aes(x=provider_name, y=avg_charge), fill = 'green',
+           color = 'black')+
+  labs(title = "Average Total Charge by Provider",
+       caption = "The average total charge is compared across providers.",
+      tag = "Figure 2",x = "Provider",y = "Average Total Charge",
+    )+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+```{r}
+# Plot 3: Average Total Charge by Age. The following graph displays the relationship between age and the average total charge. The average total charge was highest at around 15 years of age. This makes sense since the average length of stay was also highest at the same age. Furthermore, the average total charge was lowest at roughly the age of 105 years when the the average length of stay is also the lowest. Therefore, there appears to be a positive correlation between the total charge and the length of stay.
+
+df %>% group_by(age) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+ 
+  geom_line(mapping=aes(x=age, y=avg_charge),
+           color = 'yellow')+
+  labs(title = "Average Total Charge by Age",
+       caption = "The average total charge is compared across age",
+      tag = "Figure 3",x = "Age",y = "Average Total Charge",
+    )+
+  theme_dark()
+
+```
+
+```{r}
+# Changing the name of the categories within the variable `payer` to make the graph more legible. These changes are saved to a new variable named `insurance`.
+
+insurance <- df$payer %>% str_replace("0","Medicare") %>% 
+  str_replace("1","Medicaid") %>% 
+  str_replace("4","Worker's Compensation") %>% 
+  str_replace("5","Blue Cross") %>% 
+  str_replace("6","Commercial Insurance") %>% 
+  str_replace("7","Self Pay") %>% 
+  str_replace("8","Other") %>% 
+  str_replace("B","Champus") %>% 
+  str_replace("D","United Health Care") %>% 
+  str_replace("E","Coordinated Health Partners Inc") %>%
+  str_replace("G","RIte Care") %>% 
+  str_replace("H","Neighborhood Health Plan of RI") %>%
+  str_replace("X","Insurance error") %>% 
+  str_replace("Y","Missing") %>% 
+  str_replace("Z","Unknown")
+  
+df1 <- df1 %>% mutate(insurance = insurance)
+
+head(df1)
+  
+```
+
+```{r}
+# Plot 4: Average Total Charge by Insurance. In the graph below, the average total charge is compared across insurance providers. The 'Unknown' category for insurance was filtered out since it represents a missing value. On the other hand, the category 'Missing' was left in since it represents the patients who are uninsured. Surprisingly, the uninsured had the lowest total expense on average. Perhaps this is due to insurance not being used on cheap visits or that the uninsured are avoiding these hospitals for more extensive treatments. Out of all forms of insurance, Medicaid had the highest average total charge which exceeds $4,000.
+
+df1 %>% filter(insurance != "Unknown") %>% 
+  group_by(insurance) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+
+  geom_col(mapping=aes(x= avg_charge, y=insurance), fill = 'navy',
+           color = 'black')+
+  labs(title = "Average Total Charge by Insurance",
+       caption = "The average total charge is compared across insurance companies.",
+      tag = "Figure 4",x = "Average Total Charge",y = "Insurance",
+    )+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 5))
+  
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Plot 5: Average Total Charge by Gender and age. The following graph compares the average total charge by age between males and females. The average total charge for males is higher than females at most ages. This could be due to factors such as a higher length of stay on average for males. The average length of stay between  genders will be explored in greater detail in a later graph. The graph below follows a similar pattern for average total charge as the previous graphs indicating that the average total charge is strongly impacted by the length of stay.
+
+df %>% filter(sex == 1 | sex == 2) %>% 
+  group_by(age,sex) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+
+  geom_line(aes(x = age, y = avg_charge, color = sex))+
+  labs(title = "Average Total Charge by Age and Gender",
+       caption = "The average total charge is compared across age and gender.",
+      tag = "Figure 5",x = "Age",y = "Average Total Charge",
+    )+
+  theme_fivethirtyeight()
+  
+
+```
+
+```{r}
+# Plot 6: Average Total Charge by Patient's State (For New England). The following graph displays a huge difference in the average total charge for patients from Maine than other states. Since none of the hospitals in the dataset are located in Maine, its likely that the higher charge is the result of patients having to travel for a complex procedure. Therefore, the patients from Maine likely require a longer stay than the average patient thus driving up the average total expense.
+
+df %>% filter(pt_state == "RI"|
+                pt_state == "MA"|
+                pt_state == "CT"|
+                pt_state == "NH"|
+                pt_state == "VT"|
+                pt_state == "ME") %>% 
+  group_by(pt_state) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+
+  geom_col(aes(x = pt_state, y=avg_charge), fill = 'seagreen2',color = 'black',)+
+  labs(title = "Average Total Charge across Patient State",
+       caption = "The average total charge is compared across the state of patients (New England Only).",
+      tag = "Figure 6",x = "Patient State",y = "Average Total Charge")+
+  theme_stata()
+
+
+```
+
+```{r}
+# Plot 7: Length of Stay by Age and its Effect on Total Charge. A bubble plot is displayed below which showcases the relationship between the variables `age`, `los`, and `tot` (Age, Length of Stay, and Total Charge). This plot is great at indicating outliers and demonstrates that the patients with the highest length of stay and total charge are the younger patients. 
+
+df %>% 
+  ggplot()+
+  geom_point(aes(x=age,y=los, size = tot), color = 'midnightblue')+
+  labs(title = "Length of Stay by Age",
+       caption = "A scatter plot is used to determine the relationship between age and
+       length of stay. The size of the points correspond to the total charge. ",
+      tag = "Figure 7",x = "Age",y = "Length of Stay",
+    )+
+  theme_solarized()
+```
+
+
+```{r}
+# Checking for empty categories within the variable `er_mode`. The categories 0,'', and 9 must be removed since they represent missing values. These categories are listed in the specifications for the datafile as 0 = Not Applicable, 9 = Information Not Available, "" = unknown. 
+
+table(df1$er_mode)
+
+```
+```{r, message=FALSE, warning=FALSE}
+# Removing empty categories with filter.
+
+df1 <- df1 %>% filter(er_mode == c("1","2","3","4","5"))
+
+# Renaming categories within the variable `er_mode` with the function 'str_replace()'
+
+mode_of_arrival <- df1$er_mode %>% 
+  str_replace("1","Rescue Service/Ambulance") %>% 
+  str_replace("2","Helicopter") %>% 
+  str_replace("3","Law Enforcement or Social Services") %>% 
+  str_replace("4","Personal or Public Transportation") %>% 
+  str_replace("5","Other")
+  
+df1 <- df1 %>% mutate(mode_of_arrival = mode_of_arrival)
+
+table(df1$mode_of_arrival)
+
+```
+
+
+```{r}
+# Plot 8: Avg. Total Charge by Mode ER_Mode. The following graph compares the average total charge across the variable `er_mode`. The patients that arrive by helicopter pay the most on average followed by law enforcement or social services, and Rescue Service / Ambulance. The patients that arrive by helicopter pay nearly 3 times more on average than someone that arrives by private or public transportation.
+
+df1 %>% group_by(mode_of_arrival) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+
+  geom_col(aes(x=mode_of_arrival,y=avg_charge),fill = 'orchid',color = 'black')+
+  labs(title = "Average Total Charge by Mode of Arrival",
+       caption = "A barplot is created to compare the average total charge by ER_Mode. ",
+      tag = "Figure 8",x = "Mode of Arrival",y = "Average Total Charge",)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+```
+
+```{r}
+# Plot 9: Avg. Total Charge by Service. The following graph compares the average total charge by month across the two services in the dataset. The average total charge for both services appear to be lowest during the summer months and highest towards the end of the year. However, the average total charge did not change by much during this time. The psychiatry patients paid much less on average than patients that were there for other reasons. This explains why providers such as Butler had much lower total charges on average since they specialize in psychiatry.
+
+
+# Renaming the two categories within `service` and saving the categories to a new variable.
+
+service_type <- df1$service %>%
+  str_replace("00", "Other") %>% 
+  str_replace("38", "Psychiatry")
+
+# Adding the variable to the dataframe with the 'mutate()' function.
+
+df1 <- df1 %>% mutate(service_type = service_type)
+
+# Plotting the average total charge by month of arrival for both services to compare.
+
+df1 %>% group_by(moa,service_type) %>% 
+  summarise(avg_charge = mean(tot)) %>% 
+  ggplot()+
+  geom_line(aes(x=moa,y=avg_charge,color = service_type))+
+  labs(title = "Average Total Charge by Service",
+       caption = "The average total charge by service is compared using a line plot.",
+      tag = "Figure 9",x = "Month",y = "Average Total Charge",
+    )+
+  theme_gdocs()
+  
+
+```
+
+```{r}
+# Plot 10: Avg. Length of Stay by Gender. In the plot below, it is clear that men stay longer on average for all 12 months of the year. This indicates that it is the higher average length of stay for males that is driving higher total charge on average.
+
+df %>% filter(sex == 1 | sex == 2) %>% 
+  group_by(moa,sex) %>% 
+  summarise(avg_length_of_stay = mean(los)) %>% 
+  ggplot()+
+  geom_line(aes(x=moa,y=avg_length_of_stay,color=sex))+
+  labs(title = "Average Length of Stay by Gender",
+       caption = "A lineplot is created to compare the average length of stay by month between genders.",
+      tag = "Figure 10",x = "Month",y = "Average Length of Stay",
+    )+
+  theme_fivethirtyeight()
+
+```
+
+2. Make an animation plot. 
+
+```{r}
+# Importing the library 'gganimate' to animate plots. The code below generates an animated bar race plot between the 5 providers with the highest total charge by month.
+
+library(gganimate)
+
+# Creating the plot for the total amount charged by provider.
+df2 <- df1 %>% group_by(provider_name, moa) %>% 
+  summarise(total_amount_charged = sum(tot)) %>% 
+  mutate(rank=rank(-total_amount_charged)) %>% 
+  filter(rank <=5)
+
+p2 <- df2 %>% 
+  ggplot(aes(x=rank, y=total_amount_charged, group=provider_name, fill=provider_name, 
+             label=provider_name)) + 
+  geom_col()+
+  geom_text(aes(y = total_amount_charged, label = provider_name), hjust = 1.4)+ 
+  coord_flip(clip = "off", expand = FALSE) + 
+  labs(title = 'Month: {closest_state}', x='Total Amount Charged', 
+  y='Provider', fill='provider_name')+
+  theme(plot.title = element_text(hjust = 1, size = 22),
+          axis.ticks.y = element_blank(),
+          axis.text.y  = element_blank()) + 
+  transition_states(moa)+
+  ease_aes("cubic-in-out")
+animate(p2, nframes = 400)
+
+```
+
+3. Write a paragraph to summarize the section and give your comments on the results.
+
+  In this section, the variables that appear to have the greatest impact on the total charge are the length of stay, age, er_mode, provider, and service. Of the variables mentioned, the variable `los`(length of stay) had the greatest impact on total charge. This is because the variable `los` captures both er_mode (mode of arrival) and age since they appear to be correlated from their plots. As a result, the patients with the highest total charge tend to be younger, and arrive by ambulance or helicopter. This section also researched the difference in the average total charge between males and females. However, the higher average total charge for males was the result of them averaging a higher length of stay. For providers such as Bradley charging more on average than others such as Butler, their average total charge is determined by the service they provide. Therefore, the service had a greater impact on the total charge than the provider. On a final note, the patients that paid the least tended to have the shortest length of stay, arrive by public or personal transportation, and received psychiatric treatment.
+
+
+-------
+
+## III. Predictive Models
+
+Continue with the data from part I. Make sure you do not have any missing values in the data. Use the follows as the target and input variables: 
+
+```{r}
+# Checking for missing values by column in NA form.
+
+df %>% is.na %>% colSums
+```
+
+
+*Target Variable*: Create the target variable taking value of 
+
+  - `low` if the total charge of a patient (`tot`) is smaller than the median of the total charge, and
+
+  - `high` otherwise.
+  
+```{r}
+# Using the ifelse function to test if the total charge for a patient is less than the average. If so, the variable takes the value 'low', else it will take on the value 'high'.
+
+df$target <- ifelse(df$tot < mean(df$tot), 'low','high')
+head(df)
+```
+  
+*Input Variables*:
+
+  - "age","sex","raceethn","provider","moa","mod","admtype","campus", 'los'
+  
+-------
+
+1. Use `filter` function to filter out rows where `raceethn==''` or `admtype==''`. Make sure all the categorical variables are factor, numeric variables are numeric. Set Training : Testing Split = 10 : 90 
+
+```{r}
+# Using the 'filter' function to remove the rows were the variables `raceethn` or `admtype` had empty values. The changes are saved to the dataframe.
+
+df <- df %>% filter(raceethn != '' & admtype != '') %>% 
+  select("age","sex","raceethn","provider","moa","mod","admtype","campus", "los", "target")
+
+head(df)
+```
+```{r}
+# Updating the class of the variables in the dataframe to numeric and factor with mutate. The changes are saved to the dataframe.
+
+df <- df %>% 
+
+  mutate(target = as.factor(target),
+         
+         age = as.numeric(age),
+
+         los = as.numeric(los),
+
+         campus = as.factor(campus),
+
+         admtype = as.factor(admtype),
+
+         mod = as.factor(mod),
+
+         moa = as.factor(moa),
+
+         provider = as.factor(provider),
+
+         raceethn = as.factor(raceethn),
+
+         sex = as.factor(sex)
+
+         )
+
+head(df)
+```
+
+```{r}
+# Importing library and setting seed. A data partition with a 10:90 split for testing and training was established with 10% of the data being saved to a test dataframe while the remaining 90% are saved to a training dataset.
+
+library(caret)
+
+set.seed(2023)
+
+partition <- createDataPartition(df$target, p = .90, 
+
+                                  list = FALSE)
+
+trainDf <- df[ partition,]
+
+testDf <- df[-partition,]
+
+```
+
+
+2. Train a decision tree using `rpart`.  Plot the decision tree. Plot the variable importance ranked by the tree.
+
+```{r}
+# Importing library to plot the decision tree. The tree was trained on the training data with a max depth of 3 using rpart's control parameter. For additional statistics on the tree, a confusion matrix was created and the accuracy was displayed.
+
+library(rpart)
+
+library(rattle)
+
+tree <- rpart(target ~ ., data = trainDf,
+
+              control = rpart.control(maxdepth = 3))
+
+# Creating predictions on the testing data.
+
+prediction <- predict(tree, testDf, type = "class")
+
+# Creating a confusion matrix to test the predictions.
+
+cm <- confusionMatrix(data = prediction,
+
+                      reference = testDf$target, positive = "high")
+
+cm$overall[1]
+
+```
+
+```{r}
+# Plotting the decision tree with the 'fancyRpartPlot' function by Rattle.
+
+fancyRpartPlot(tree)
+
+```
+```{r}
+# Plotting the variable importance of the tree using a bar plot. The variables with the greatest importance are `los`, `provider`, and `admtype`.
+
+barplot(tree$variable.importance)
+```
+
+3. Using caret for this question. Set `Training Control` to be: Use Cross-Validation of 5 folds across all models.  Train & tune at least 2 different models (i.e. two different values for `method=` in the train function of caret).  Plot the hyper-parameter tuning plots for each model. 
+
+```{r}
+# Creating the first model with a training control parameter set. Here, the cross-validation of 5 folds was established using the argument 'number = 5'. This model uses the method 'ranger' with the tuning parameters 'mtry', 'splitrule', and 'min.node.size'. These parameters determine the number of varable candidates for each split, along with the splitting rule and the minimum node size for each tree. The model will then find the best combination of tuning parameters to corresponding to the highest training accuracy. The model is then evaluated against the testing data partition and a confusion matrix is created.
+
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 5)
+
+tuneGrid = expand.grid(mtry = 2:4,
+                       splitrule = c('gini', 'extratrees'),
+                       min.node.size = c(1:10))
+
+model1 <- train(target~., data=trainDf, 
+              method = "ranger", 
+              trControl = ctrl,
+              tuneGrid = tuneGrid)
+
+pred <- predict(model1, testDf)
+
+cm1 <- confusionMatrix(data = pred, reference = testDf$target, positive = "high")
+
+model1
+```
+```{r}
+# Displaying the confusion matrix and statistics. The first model had a testing accuracy of 0.8498. The testing accuracy is not too different from the training accuracy of 0.8553705 suggesting that the model is not over fit. This model is a random forest with a total of 4 trees with the split rule 'gini', and a minimum node size of 4.
+
+cm1
+```
+
+```{r, message=FALSE, warning=FALSE}
+
+# Creating the second model with a training control parameter set. Here, the cross-validation of 5 folds was established. This model uses the method 'RFlda'. With this method, the tuning parameter 'q' is set to the interval from 2 to 5 to determine the correct number of factors. This method essentially uses factor analysis to combine variables into factors to predict the target.
+
+set.seed(64)
+
+ctrl = trainControl(method = "cv",
+                         number = 5)
+
+tuneGrid = expand.grid(q = 2:5)
+
+model2 <- train(target~., data=trainDf, 
+              method = "RFlda", 
+              trControl = ctrl,
+              tuneGrid = tuneGrid)
+
+pred <- predict(model2, testDf)
+
+cm2 <- confusionMatrix(data = pred, reference = testDf$target, positive = "high")
+
+model2
+
+```
+
+```{r}
+# Displaying the confusion matrix and statistics for the second model.
+
+cm2
+```
+Plot the hyper-parameter tuning plots for each model.
+```{r}
+# Plotting the hyper-parameter tuning plots for each model.
+
+plot(model1)
+
+```
+
+```{r}
+
+plot(model2)
+```
+
+
+4. Plot the comparison of the models in 3. 
+
+```{r}
+# Plotting the comparison of the models from question 3.
+
+comparison <- resamples(list('Ranger Random Forest' = model1,
+'Factor-Based Linear Discriminant Analysis' = model2))
+
+bwplot(comparison)
+```
+
+
+5. What is your final selection for the model? Test the accuracy of your final model on the test data. 
+
+```{r}
+# After comparing the two models, the best model is clearly the first model. This model displayed both the best training and testing accuracy. Despite both models having very high specificity the second model had a far lower sensitivity. Therefore, the first model using the 'ranger' method is the best model at predicting the level of total charge. This model had a testing accuracy of 0.8498.
+
+cm1
+```
+
+6. Create another `target` variable (binary), decide the input variables and redo 1 to 5. 
+
+6.1. Use `filter` function to filter out rows where `raceethn==''` or `admtype==''`. Make sure all the categorical variables are factor, numeric variables are numeric. Set Training : Testing Split = 10 : 90 
+
+```{r}
+# Resetting the dataframe back to checkpoint by reassigning the dataframe with read_csv. Therefore, the empty categories and variable classes will need to be changed once more. The columns containing missing values will need to be dropped and the data will also need to be partitioned again.
+
+library(tidyverse)
+library(lattice)
+df <- read_csv('midterm.csv')
+
+# Removing empty categories within columns.
+
+df <- df %>% filter(raceethn != '' & admtype != '') %>% 
+  select(-c("payfix","preopday","obs_hour","nicu_day"))
+
+# Creating the target variable.
+
+timeAdmitted <- ifelse(df$los < mean(df$los), 'short.term','long.term')
+
+df$target <- timeAdmitted
+
+# Input Variables: `moa`, `age`, `sex`, `asource`, `tot`, `icu`, `ccu`, `payer`, `service`, `provider.`
+
+df <- df %>% 
+  select('moa','age','sex','asource','tot','icu','ccu','payer','service','provider','target')
+  
+head(df)
+  
+```
+```{r}
+# Checking for missing values in the dataframe.
+
+df %>% is.na %>% colSums
+```
+```{r}
+# Removing the three rows containing missing values and displaying results.
+
+df <- drop_na(df)
+
+df %>% is.na %>% colSums
+
+```
+
+```{r}
+# Updating classes. The classes of the variables `age` and `tot` are already numeric so they were not changed.
+
+set.seed(2023)
+
+df <- df %>% 
+
+  mutate(target = as.factor(target),
+         
+         icu = as.numeric(icu),
+         
+         ccu = as.numeric(ccu),
+         
+         payer = as.factor(payer),
+         
+         service = as.factor(service),
+
+         moa = as.factor(moa),
+
+         provider = as.factor(provider),
+
+         asource = as.factor(asource),
+
+         sex = as.factor(sex)
+
+         )
+
+# Creating partition for 90% training data and 10% testing data.
+
+partition <- createDataPartition(df$target, p = .90, 
+
+                                  list = FALSE)
+
+trainDf <- df[ partition,]
+
+testDf <- df[-partition,]
+
+head(df)
+```
+6.2. Train a decision tree using `rpart`.  Plot the decision tree. Plot the variable importance ranked by the tree.
+
+```{r}
+# Creating a decision tree model. The tree was trained on the training data with a max depth of 3 using rpart's control parameter. For additional statistics on the tree, a confusion matrix was created and the accuracy was created. The testing accuracy of this model is approximately 0.809113.
+
+tree <- rpart(target ~ ., data = trainDf,
+
+              control = rpart.control(maxdepth = 3))
+
+# Creating predictions on the testing data.
+
+prediction <- predict(tree, testDf, type = "class")
+
+# Creating a confusion matrix to test the predictions.
+
+cm <- confusionMatrix(data = prediction,
+
+                      reference = testDf$target, positive = "long.term")
+
+cm$overall[1]
+
+```
+```{r}
+# Plotting the decision tree with Rattle's 'fancyRpartPlot()' function.
+
+fancyRpartPlot(tree)
+```
+```{r}
+# Plotting the variable importance of the decision tree using a barplot.
+
+barplot(tree$variable.importance)
+```
+6.3. Using caret for this question. Set `Training Control` to be: Use Cross-Validation of 5 folds across all models.  Train & tune at least 2 different models (i.e. two different values for `method=` in the train function of caret).  Plot the hyper-parameter tuning plots for each model. 
+
+```{r}
+# Creating the first model. This model is a boosted glm as established by the 'method' argument. The cross validation for the model was set to 5 for the 'trControl' argument. The parameters for the boosted glm are mstop and prune which correspond to the number of variables per split and the number of times the model is pruned. 
+
+set.seed(42)
+
+ctrl = trainControl(method = "cv",
+                         number = 5, classProbs = TRUE)
+
+tuneGrid = expand.grid(mstop = 2:5, prune = 1:3)
+
+
+model1 <- train(target ~ ., data=trainDf, method = "glmboost", trControl = ctrl, tuneGrid = tuneGrid)
+
+
+pred <- predict(model1, testDf)
+
+cm1 <- confusionMatrix(data = pred, reference = testDf$target, positive = "long.term")
+
+model1
+```
+
+```{r}
+# Displaying the confusion matrix and statistics for the first model. This model had a testing accuracy of ~ 0.7034. The Kappa value of 0.0747 is low indicating that this model is not very reliable.
+
+cm1
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Creating the second model to predict the level of length of stay. Like the previous model, the number of cross validations was set to 5 in the 'trControl' parameter. This model was trained using the method 'fda'; the final tuning parameters are 'degree = 1 'and 'nprune = 23 '.
+
+set.seed(42)
+
+ctrl = trainControl(method = "cv",
+                         number = 5)
+tuneGrid = expand.grid(degree = 1:5, nprune = 2:5)
+
+model2 <- train(target~., data=trainDf, 
+              method = "fda", 
+              trControl = ctrl)
+
+pred <- predict(model2, testDf)
+
+cm2 <- confusionMatrix(data = pred, reference = testDf$target, positive = "long.term")
+
+model2
+```
+
+```{r}
+# Displaying the confusion matrix and statistics for the second model. The testing accuracy of this model has been evaluated at 0.828.
+
+cm2
+```
+Plot the hyper-parameter tuning plots for each model.
+
+```{r}
+# Creating the hyper-parameter tuning plot for the first model.
+
+plot(model1)
+```
+
+```{r}
+# Plotting the hyper-parameter tuning plot for the second model.
+
+plot(model2)
+```
+
+
+6.4. Plot the comparison of the models in 6.3.
+
+```{r}
+# Plotting the model comparison for statistics such as accuracy and kappa.
+
+comparison <- resamples(list('Boosted GLM' = model1,
+'Flexible Discriminant Analysis' = model2))
+
+bwplot(comparison)
+```
+
+6.5. What is your final selection for the model? Test the accuracy of your final model on the test data.
+
+```{r}
+# The final selection for the model is the second model which is a flexible discriminant analysis model. This model had both a higher training accuracy and testing accuracy than the first model. The model's training accuracy has been evaluated at ~ 0.830 and testing accuracy at 0.828. In addition to having a good accuracy, the model's Kappa value is also relatively high at 0.5874 indicating that this model is reliable. This was done in a prior step, but the code and output are displayed here for reference.
+
+pred <- predict(model2, testDf)
+
+cm2 <- confusionMatrix(data = pred, reference = testDf$target, positive = "long.term")
+
+cm2
+
+```
+7. Write a paragraph to summarize the section and give your comments on the results. 
+
+  After training 2 different models using various methods, the first model has been decided as the final model. This model utilized the method 'ranger' along with the tuning parameters 'mtry', 'splitrule', and 'min.node.size.' The model has displayed the best model performance statistics such as testing accuracy and kappa indicating that it is a strong model for predicting the level of total charge. Furthermore, The model's testing accuracy has been evaluated at 0.8498 and kappa at 0.5899. In comparison, the other model used in this section used the method RFlda. The only tuning parameter for this model was 'q' which determined the number of factors. The value of q that resulted in the highest accuracy was 'q = 3', but the testing accuracy was still significantly lower than the first model. On the other hand, when the target variable was set `timeAdmitted`, which recorded whether a patient had a longer or shorter stay, two additional models were created. The first model was a boosted generalized linear model with the tuning parameters 'mstop = 5' and 'prune = 1'. The testing accuracy of this model was somewhat low at approximately 0.7034, and the low kappa value indicated that this model was not reliable. For the second model, it was created with the 'method = fda' meaning that the model uses flexible discriminant analysis. This model contains the tuning parameters 'nprune' and 'degree'. The testing accuracy for the second model has been evaluated at 0.828, and the Kappa value of 0.5874 indicates that this is a reliable model. Therefore, final model decided was the second model due to better model performance statistics such as testing accuracy and Kappa. 
+
+-------
+
+
+
+
+
