@@ -73,3 +73,7 @@ editor: visual
 ### Plots
 
 \- [Assignment 7 Plot](billionaires.png)
+
+### Midterm
+
+\= [Midterm](MP_Math_421_Midterm.html)
