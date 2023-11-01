@@ -1,0 +1,263 @@
+---
+title: "![](Title_Image.png){width=90%} \nMidterm Presentation"
+author: "Michael Petrarca"
+date: "2023-10-30"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Presentation Format
+
+-   Visualization
+
+-   Model Comparison
+
+
+
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Importing the library 'haven' and using it's built-in read_sas function to save the data to a dataframe.
+
+library(haven)
+library(dplyr)
+library(tidyverse)
+
+df <- read.csv('midterm.csv')
+
+head(df)
+```
+
+## Code for Figure 1
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+
+fig1 <- df %>% group_by(age) %>% 
+  summarise(avg_los = mean(los)) %>% 
+  ggplot()+ 
+  geom_line(mapping=aes(x=age,y=avg_los),
+           color = 'red')+
+  labs(title = "Average Length of Stay by Age",
+       caption = "The average length of stay is compared across age.",
+      tag = "Figure 1",x = "Age",y = "Average Length of Stay",
+    )+
+  theme_solarized()
+```
+
+## Figure 1
+
+```{r}
+fig1
+```
+
+## Figure 2
+
+![](Figure2.png){width="90%"}
+
+- A bar plot was created to display the difference in average total charge among providers.
+
+- To prepare the graph, the data was grouped by provider name and then summarized by the average charge
+
+## Figure 3
+
+![](Figure3.png){width="100%"} 
+
+- In figure 3, the average total charge peaks for patients around 15 years in age. This relates to figure 1 as the average length of stay by age follows the same pattern.
+
+- Towards the upper bound for age, the average total charge varies greatly due to a small sample of patients over the age of 100.
+
+## Figure 4
+
+![](Figure4.png){width="80%"}
+
+- In figure 4, the average total charge is compared by insurance with a bar chart.
+
+- Medicaid had the highest average total charge with an average total charge exceeding $4,000.
+
+- On the other hand, the patients without insurance somehow paid the least on average.
+
+## Figure 5
+
+![](Figure5.png){width="80%"}
+
+- In the graph above, the average total charge is compared between genders.
+
+- On average, the total charge for males was higher than for females.
+
+- This may be due to males averaging a higher length of stay which will be discussed in later plots.
+
+## Figure 6
+
+![](fig6.png){width="100%"}
+
+- In figure 6, the average total charge for patients from Maine was far higher than the patients from other New England States.
+
+- This could be due to patients who travel from Maine to Rhode Island require a longer stay on average.
+
+## Figure 7
+
+![](fig7.png){width="90%"}
+
+- A bubble plot was used to determine whether there exists a relationship between age and length of stay. The size of the points correspond to the total charge.
+
+- There appears to be a stronger correlation between total charge and length of stay than age and length of stay.
+
+## Figure 8
+
+![](fig8.png){width="100%"}
+- In the graph above, the average total charge was highest for patients that arrived by helicopter or law enforcement / social services.
+
+- As expected, the patients that arrived by private or public transportation paid the least on average.
+
+## Figure 9
+
+![](fig9.png){width="100%"}
+- In the dataset there were only two forms of service used, so they were represented with a line plot in the upper left. 
+
+- The patients that were there for psychiatry paid roughly half as much as patients that were there for other reasons.
+
+## Figure 10
+
+![](figure10.png){width="100%"}
+
+- The average length of stay was highest for males during the month of October but lowest for females during the same month.
+
+- During the month of October, male patients stayed an extra day, on average, than female patients.
+
+## Code Behind Animation Plot Part 1
+```{r, message=FALSE, warning=FALSE}
+
+library(gganimate)
+
+df1 <- read_csv("checkpoint.csv")
+# Creating the plot for the total amount charged by provider.
+df2 <- df1 %>% group_by(provider_name, moa) %>% 
+  summarise(total_amount_charged = sum(tot))
+```
+
+- The code above is used to load the data from a checkpoint from the midterm.
+
+- The data is grouped by provider and month and the average total charged is compared with the summarize function.
+
+- Then, a bar race can be created in the next slide.
+
+## Code Behind Animation Plot Part 2
+
+```{r}
+p2 <- df2 %>% 
+  ggplot(aes(x=provider_name, y=total_amount_charged,
+             group=provider_name,
+             fill=provider_name, 
+             label=provider_name)) + 
+  geom_col()+
+  geom_text(aes(y = total_amount_charged, label = provider_name),
+            hjust = 1.4)+ 
+  coord_flip(clip = "off", expand = FALSE) + 
+  labs(title = 'Month: {closest_state}', x='Total Amount Charged', 
+  y='Provider', fill='provider_name')+
+  theme(plot.title = element_text(hjust = 1, size = 22),
+          axis.ticks.y = element_blank(),
+          axis.text.y  = element_blank()) + 
+  transition_states(moa)+
+  ease_aes("cubic-in-out")
+```
+
+## Animation Plot
+
+```{r}
+animate(p2, nframes = 400)
+```
+
+
+
+## Results of Visualization
+
+- The variable driving the higher average total charge for males is the length of stay.
+
+- This is because the average length of stay was significantly higher for males.
+
+- The difference in average total charge among providers is the result of the services they provide.
+
+- For example hospitals such as Butler average a lower total charge for the patient due to primarily performing psychiatric services.
+
+- The variable with the greatest impact on total charge is length of stay.
+
+
+## Part 3 Question 4
+
+![](P3Q4.png){width="100%"}
+
+- In this section, the two models compared were a random forest with the method equal to ranger and partial least squares.
+
+- Both models were created with 5 folds of cross-validation.
+
+- The tuning parameters for the random forest were mtry = 4, splitrule = gini, and min.node.size = 10
+
+
+## Part 3 Question 5
+
+![](P3Q5.png){width="20%"}
+
+- The first model using the method 'ranger' performed much better.
+
+- The testing accuracy of the first model was slightly better at 0.8481 compared to the accuracy 0.7837 achieved by the partial least squares method
+
+- The kappa value of 0.5785 in the first model was much higher than the second model's kappa of 0.3349.
+
+## Part 3 Question 6 (Creating Target Variable and Partitioning Data)
+
+![](6.1.png){width="40%"}
+
+- The target variable is binary and indicates whether a patient had a long or short stay.
+
+- The data is then partitioned with the training:testing split set to 10:90
+
+
+## Part 3 Question 6 (Training and Plotting Decision Tree)
+
+![](P3Q6.2.png){width="40%"}
+
+- A decision tree is made with rpart and then plotted with rattle's 'FancyRpartPlot' function.
+
+- The variables that had the biggest impact on the target, which represented length of stay, were total charge, length of stay in the ICU, and provider.
+
+## Part 3 Question 6 (Training and Plotting 2 Models)
+
+![](P3Q6.3.png){width="40%"}
+- In the image above, two models were created and their tuning plots were displayed.
+
+- For the boosted GLM, the accuracy is increased with the number of boosting iterations.
+
+- For the Flexible Discriminant Analysis model, the number of terms is best at roughly 12. This is because the accuracy gained by increasing the number of terms plateaus after that point.
+
+
+## Part 3 Question 6 (Comparing 2 Models)
+
+![](P3Q6.4.png){width="40%"}
+
+- The Flexible Discriminant Analysis model had both a higher accuracy and kappa value than the Boosted GLM.
+
+- The FDA model had a testing accuracy of 0.8245 and a kappa value of 0.5843.
+
+- The Boosted GLM had a testing accuracy of 0.707 and a kappa value of 0.0898
+
+
+
+
+## Part 3 Question 6 (Final Model)
+
+![](P3Q5.png){width="20%"}
+
+- Due to better model performance statistics such as accuracy and kappa, the Flexible Discriminant model is the winner.
+
+- The high accuracy and kappa value indicate that this model is reliable at predicting the level of length of stay for patients.
+
