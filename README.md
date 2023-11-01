@@ -77,3 +77,7 @@ editor: visual
 ### Midterm
 
 \- [Midterm](MP_Math_421_Midterm.html)
+
+### Midterm Presentation
+
+\- [Midterm Presentation](MidtermPresentation.html)
