@@ -60,6 +60,14 @@ editor: visual
 
 \- [Assignment 12](assignment12.html)
 
+#### Assignment 13 (Text Mining)
+
+\- [Assignment 13](assignment13.html)
+
+#### Assignment 14 (Text Mining - Reddit)
+
+\- [Assignment 14](assignment14.html)
+
 ### Extra Credit Assignments
 
 \- [Assignment 4 Extra Credits](assignment4_extra_credits.html)
