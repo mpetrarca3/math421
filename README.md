@@ -78,6 +78,8 @@ editor: visual
 
 \- [Assignment 9 Extra Credits](Assignment_9_Extra_Credits.html)
 
+\- [Assignment 14 Extra Credits](assignment14_extra.html)
+
 ### Plots
 
 \- [Assignment 7 Plot](billionaires.png)
