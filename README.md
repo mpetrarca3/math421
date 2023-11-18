@@ -72,6 +72,10 @@ editor: visual
 
 \- [Assignment 15](assignment15.html)
 
+#### Assignment 16 (Functions: Loop)
+
+\- [Assignment 16](assignment16.html)
+
 ### Extra Credit Assignments
 
 \- [Assignment 4 Extra Credits](assignment4_extra_credits.html)
