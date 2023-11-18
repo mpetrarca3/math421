@@ -434,9 +434,9 @@ mean_impute &lt;- function(x)
 {
   if(is.numeric(x))
   {
-    # Find the mode of x
+    # Find the mean of x
     mean_of_x &lt;- mean(x, na.rm = TRUE)
-    # Replace the missing by the mode
+    # Replace the missing by the mean
     library(tidyr)
     x &lt;- replace_na(x, mean_of_x) 
   }
