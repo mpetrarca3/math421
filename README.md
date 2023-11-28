@@ -76,6 +76,10 @@ editor: visual
 
 \- [Assignment 16](assignment16.html)
 
+#### Assignment 17 (Data Simulation)
+
+\- [Assignment 17](assignment17.html)
+
 ### Extra Credit Assignments
 
 \- [Assignment 4 Extra Credits](assignment4_extra_credits.html)
