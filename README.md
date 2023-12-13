@@ -103,3 +103,8 @@ editor: visual
 ### Midterm Presentation
 
 \- [Midterm Presentation](MidtermPresentation.html)
+
+### Final Project
+
+\- [Final Project](final.html)
+
