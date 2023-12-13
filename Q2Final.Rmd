@@ -1,0 +1,283 @@
+---
+title: "Q2Final"
+author: "Michael Petrarca"
+date: "2023-12-01"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    source_code: embed
+    social: menu
+---
+
+```{r, include=FALSE}
+# Importing libraries and data.
+library(dplyr)
+library(tidyverse)
+df <- read_csv('AirBnb_NYC - test.csv', show_col_types = FALSE)
+summary(df$price)
+
+# Creating a target variable to determine whether the price per night is expensive. Using the 'summary()' function, the third quartile was calculated at $180.00 / night.
+target <- ifelse(df$price<180,0,1)
+
+df$target <- target
+df <- drop_na(df)
+df <- df %>% select(-c(id,host_id,latitude,longitude))
+head(df)
+```
+
+```{r setup, include=FALSE}
+# Importing libraries.
+library(flexdashboard)
+library(tidyverse)
+library(plotly)
+library(knitr)
+library(DT)
+
+# Create a bar plot for the proportion of rentals that are priced above the target price by neighborhood group.
+p <- df %>% 
+  mutate(target = factor(target)) %>% 
+  ggplot()+ 
+  geom_bar(mapping=aes(x=neighbourhood_group, fill=target), 
+           position = 'fill')+
+  labs(y='Proportion', fill='target')
+
+# Creating a smooth plot for price by the number of reviews to determine the relationship between the two variables.
+p1 <- df %>% 
+  mutate(target = factor(target)) %>%
+  ggplot()+ 
+  geom_smooth(mapping = aes(x = number_of_reviews, y = price))
+
+# Creating a line plot to expand on the previous plot. This time for each neighborhood for comparison.
+
+p2 <- df %>% 
+  mutate(target = factor(target)) %>% 
+  ggplot()+
+  geom_line(mapping = aes(x = number_of_reviews, y = price,
+                          color = neighbourhood_group))
+
+# Creating a column plot to compare the reviews per month amoungst all neighborhood groups.
+p3 <- df %>% 
+  mutate(target = factor(target)) %>% 
+  ggplot()+
+  geom_col(mapping = aes(x = neighbourhood_group, y = reviews_per_month ))
+```
+
+{.sidebar}
+=======================================================================
+
+### 1. AirBnb
+
+AirBnb is a growing corporation that specializes in short-term real estate. The company has developed an app that compares the prices of properties for rent around the world. This data set focuses on New York City and the surrounding area. Therefore, it compares the price per night across all areas in NYC to determine how much of an effect location has on price.
+
+
+### 2. Flexdashboard and Plotly
+
+This interactive uses `flexdashboard` and `plotly` to visualize the data. 
+-----------------------------------------------------------------------
+
+Exploring Data
+=======================================================================
+
+Data {data-width=500, .tabset}
+-----------------------------------------------------------------------
+
+### Data Frame
+
+```{r}
+# View the data
+df
+```
+
+### All Data
+
+```{r}
+# View all data with the function 'kable()'
+kable(df)
+```
+
+### Search Data
+
+```{r}
+# Creating a searchable dataframe with the function 'datatable()'
+datatable(df, options = list(
+  pageLength = 25
+))
+```
+
+{data-width=500}
+-----------------------------------------------------------------------
+
+Plots
+=======================================================================
+
+{data-width=500, .tabset}
+-----------------------------------------------------------------------
+
+### Plot 1
+
+```{r}
+# Calling plot 1
+ggplotly(p)
+```
+
+### Plot 2
+
+```{r}
+# Calling plot 2
+ggplotly(p1)
+```
+
+### Plot 3
+
+```{r}
+# Calling plot 3
+ggplotly(p2)
+```
+
+### Plot 4
+
+```{r}
+# Calling plot 4
+ggplotly(p3)
+```
+
+{data-width=500}
+-----------------------------------------------------------------------
+
+Neighborhood Data
+=======================================================================
+
+{data-width=500, .tabset}
+-----------------------------------------------------------------------
+
+### Overall Statistics
+
+```{r, include=FALSE}
+# Creating summary statistics for each neighborhood group with a combination of the 'group_by()' and 'summary()' functions. The summary statistics created here are `avg_price`, `avg_reviews`, and `avg_availability_365`.
+summary <- df %>% group_by(neighbourhood_group) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+```
+
+```{r}
+# Calling the summary statistics with the function 'kable()'.
+kable(summary)
+```
+
+### Bronx
+
+```{r, include=FALSE}
+# assigning a variable for bronx to calculate summary statistics for each subgroup for `neighborhood_group`. In the case for 'neighbourhood_group', the subgroup is the variable `neighborhood`.
+bronx <- df %>% filter(neighbourhood_group == "Bronx")
+bronx
+```
+
+```{r, include=FALSE}
+# Calculating summary statistics for each neighboorhood
+bronx_summary <- bronx %>% 
+  group_by(neighbourhood) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+  
+```
+
+```{r}
+# Calling the summary statistics for the Bronx.
+kable(bronx_summary)
+```
+
+### Brooklyn
+
+```{r, include=FALSE}
+# assigning a variable for brooklyn  to calculate summary statistics for each subgroup.
+brooklyn <- df %>% filter(neighbourhood_group == "Brooklyn")
+brooklyn
+```
+
+```{r, include=FALSE}
+# Calculating summary statistics for the neighborhoods in Brooklyn.
+brooklyn_summary <- brooklyn %>% 
+  group_by(neighbourhood) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+  
+```
+
+```{r}
+# Calling the summary statistics with the 'kable()' function.
+kable(brooklyn_summary)
+```
+
+### Manhattan
+
+```{r, include=FALSE}
+# assigning a variable for manhattan to calculate summary statistics for each subgroup.
+manhattan <- df %>% filter(neighbourhood_group == "Manhattan")
+manhattan
+```
+
+```{r, include=FALSE}
+# Calculating the summary statistics for each neighborhood in Manhattan.
+manhattan_summary <- manhattan %>% 
+  group_by(neighbourhood) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+  
+```
+
+```{r}
+# Calling the summary statistics for Manhattan with the 'kable()' fucntion.
+kable(manhattan_summary)
+```
+
+### Queens
+
+```{r, include=FALSE}
+# assigning a variable for queens to calculate summary statistics for each subgroup.
+queens <- df %>% filter(neighbourhood_group == "Queens")
+queens
+```
+
+```{r, include=FALSE}
+# Calculating the summary statistics for each neighborhood in Queens.
+queens_summary <- queens %>% 
+  group_by(neighbourhood) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+  
+```
+
+```{r}
+# Calling the summary statistics for each neighborhood in Queens.
+kable(queens_summary)
+```
+
+### Staten Island
+
+```{r, include=FALSE}
+# assigning a variable for staten island to calculate summary statistics for each subgroup.
+staten_island <- df %>% filter(neighbourhood_group == "Staten Island")
+staten_island
+```
+
+```{r, include=FALSE}
+# Calculating the summary statistics for the neighborhoods within Staten Island.
+staten_island_summary <- staten_island %>% 
+  group_by(neighbourhood) %>% 
+  summarise(avg_price = mean(price),
+            avg_reviews = mean(number_of_reviews),
+            avg_availability_365 = mean(availability_365))
+  
+```
+
+```{r}
+# Calling the summary statistics for Staten Island with the 'kable()' function.
+kable(staten_island_summary)
+```
+
