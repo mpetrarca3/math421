@@ -64,9 +64,21 @@ editor: visual
 
 \- [Assignment 13](assignment13.html)
 
-**Assignment 14 (Text Mining - Reddit)**
+#### **Assignment 14 (Text Mining - Reddit)**
 
-\- [Assignment 14](assignment14.html)
+\- [Assignment 14](assignment_14.html)
+
+#### **Assignment 15 (Functions: If-Else Statement)**
+
+\- [Assignment 15](assignment15.html)
+
+#### **Assignment 16 (Functions: Loop)**
+
+\- [Assignment 16](assignment16.html)
+
+#### **Assignment 17 (Data Simulation)**
+
+\- [Assignment 17](assignment17.html)
 
 ### Extra Credit Assignments
 
@@ -77,6 +89,8 @@ editor: visual
 \- [Assignment 7 Extra Credits](assignment7_extra_credits.html)
 
 \- [Assignment 9 Extra Credits](Assignment_9_Extra_Credits.html)
+
+\- [Assignment 14 Extra Credits](assignment14_extra.html)
 
 ### Plots
 
@@ -89,3 +103,7 @@ editor: visual
 ### **Midterm Presentation**
 
 \- [Midterm Presentation](MidtermPresentation.html)
+
+### Final Project
+
+\- [Final Project](final.html)
